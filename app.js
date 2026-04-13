@@ -41,6 +41,15 @@ function addArticle(article) {
     saveArticles(articles);
 }
 
+function updateArticle(id, updatedData) {
+    const articles = getArticles();
+    const index = articles.findIndex(a => a.id === id);
+    if (index !== -1) {
+        articles[index] = { ...articles[index], ...updatedData };
+        saveArticles(articles);
+    }
+}
+
 function reorderArticles(newOrderIds) {
     const articles = getArticles();
     const ordered = newOrderIds.map(id => articles.find(a => a.id === id)).filter(Boolean);
@@ -96,7 +105,7 @@ function renderAdminList() {
         div.innerHTML = `
             <div class="drag-handle" title="Sleep om te verplaatsen">☰</div>
             <a href="article-detail.html?id=${article.id}" class="draggable-title">${article.title}</a>
-            <a href="#" class="article-button" style="padding: 8px 16px; font-size: 0.85rem;">Bewerken</a>
+            <a href="create-article.html?id=${article.id}" class="article-button" style="padding: 8px 16px; font-size: 0.85rem;">Bewerken</a>
         `;
         list.appendChild(div);
     });

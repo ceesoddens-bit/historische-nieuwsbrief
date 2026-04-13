@@ -76,6 +76,27 @@
             
             let currentBase64 = '';
 
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get('id');
+            const pageTitle = document.querySelector('h1');
+
+            if (editId) {
+                const articles = getArticles();
+                const article = articles.find(a => a.id === editId);
+                if (article) {
+                    document.getElementById('article-title').value = article.title || '';
+                    document.getElementById('article-content').value = article.content || '';
+                    if (article.image) {
+                        currentBase64 = article.image;
+                        uploadBox.style.backgroundImage = `url('${currentBase64}')`;
+                        uploadBox.style.border = 'none';
+                        uploadTrigger.style.display = 'none';
+                    }
+                    if (pageTitle) pageTitle.textContent = "Artikel Bewerken";
+                    publishBtn.textContent = "Opslaan";
+                }
+            }
+
             uploadTrigger.addEventListener('click', (e) => {
                 e.preventDefault();
                 fileInput.click();
@@ -111,13 +132,22 @@
                     return;
                 }
 
-                addArticle({
-                    title: title,
-                    content: content,
-                    image: currentBase64
-                });
+                if (editId) {
+                    updateArticle(editId, {
+                        title: title,
+                        content: content,
+                        image: currentBase64
+                    });
+                    alert('Artikel succesvol gewijzigd!');
+                } else {
+                    addArticle({
+                        title: title,
+                        content: content,
+                        image: currentBase64
+                    });
+                    alert('Artikel succesvol gepubliceerd!');
+                }
 
-                alert('Artikel succesvol gepubliceerd!');
                 window.location.href = "admin.html";
             });
         });
