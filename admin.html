@@ -136,15 +136,27 @@
                     const articles = await window.getArticles();
                     
                     const inject = (prefix, article) => {
+                        const articleUrl = `https://ceesoddens-bit.github.io/historische-nieuwsbrief/article-detail.html?id=${article.id}`;
+                        
                         const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
-                        if(titleEl) titleEl.innerText = article.title;
+                        if(titleEl) {
+                            titleEl.innerHTML = `<a href="${articleUrl}" style="color: inherit; text-decoration: none;">${article.title}</a>`;
+                        }
                         
                         const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
-                        if(imgEl && article.image) imgEl.src = article.image;
+                        if(imgEl && article.image) {
+                            imgEl.src = article.image;
+                            const wrapper = doc.createElement('a');
+                            wrapper.href = articleUrl;
+                            wrapper.style.display = 'block';
+                            imgEl.parentNode.insertBefore(wrapper, imgEl);
+                            wrapper.appendChild(imgEl);
+                        }
                         
-                        // In de nieuwsbrief laten we de tekst nu weg, alleen de kop (titel) blijft staan
                         const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
-                        if(textEl) textEl.innerHTML = "";
+                        if(textEl) {
+                            textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel op website &rarr;</a>`;
+                        }
                     };
                     
                     if(articles.length > 0) inject('hoofd', articles[0]);
@@ -174,15 +186,27 @@
                     const articles = await window.getArticles();
                     
                     const inject = (prefix, article) => {
+                        const articleUrl = `https://ceesoddens-bit.github.io/historische-nieuwsbrief/article-detail.html?id=${article.id}`;
+                        
                         const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
-                        if(titleEl) titleEl.innerText = article.title;
+                        if(titleEl) {
+                            titleEl.innerHTML = `<a href="${articleUrl}" style="color: inherit; text-decoration: none;">${article.title}</a>`;
+                        }
                         
                         const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
-                        if(imgEl && article.image) imgEl.src = article.image;
+                        if(imgEl && article.image) {
+                            imgEl.src = article.image;
+                            const wrapper = doc.createElement('a');
+                            wrapper.href = articleUrl;
+                            wrapper.style.display = 'block';
+                            imgEl.parentNode.insertBefore(wrapper, imgEl);
+                            wrapper.appendChild(imgEl);
+                        }
                         
-                        // In de nieuwsbrief laten we de tekst nu weg, alleen de kop (titel) blijft staan
                         const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
-                        if(textEl) textEl.innerHTML = "";
+                        if(textEl) {
+                            textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel op website &rarr;</a>`;
+                        }
                     };
                     
                     if(articles.length > 0) inject('hoofd', articles[0]);
