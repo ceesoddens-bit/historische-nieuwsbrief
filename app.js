@@ -32,18 +32,31 @@ const db = getFirestore(app);
 const storage = getStorage(app);
 
 window.uploadImage = async function(file) {
-    if (!file) return null;
+    if (!file) {
+        console.log("Geen bestand geslecteerd voor upload.");
+        return null;
+    }
+    
+    console.log("Start upload proces voor:", file.name, "Type:", file.type, "Grootte:", (file.size / 1024).toFixed(2), "KB");
+
     try {
         const timestamp = Date.now();
-        // Remove spaces and weird chars from filename for safety
         const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-        const storageRef = ref(storage, `images/${timestamp}_${safeName}`);
+        const storagePath = `images/${timestamp}_${safeName}`;
+        const storageRef = ref(storage, storagePath);
+        
+        console.log("Uploaden naar pad:", storagePath);
+        
         const snapshot = await uploadBytes(storageRef, file);
+        console.log("Upload succesvol! Snapshot gemaakt.");
+        
         const downloadURL = await getDownloadURL(snapshot.ref);
+        console.log("Download URL ontvangen:", downloadURL);
+        
         return downloadURL;
     } catch (e) {
-        console.error("Error uploading image to Firebase Storage:", e);
-        alert("Fout bij uploaden afbeelding. Check of Storage in Firebase is geactiveerd en de regels goed staan.");
+        console.error("🔥 CRITIEKE FOUT bij uploaden naar Storage:", e);
+        alert(`Fout bij uploaden afbeelding:\n\n${e.message}\n\nCheck of Firebase Storage 'Rules' op 'true' staan en of de module is geactiveerd.`);
         return null;
     }
 };
@@ -67,7 +80,14 @@ window.getArticles = async function() {
 
 window.addArticle = async function(article) {
     try {
-        // Bepaal de hoogste order waarde zodat het artikel onderaan komt
+        // Veiligheidscheck: Nooit meer Base64 strings van > 500KB naar Firestore sturen
+        if (article.image && article.image.startsWith('data:') && article.image.length > 500000) {
+            console.error("Geweigerd: Afbeelding is te groot voor Firestore (Base64). Gebruik Storage.");
+            alert("Systeemfout: De afbeelding wordt nog als grote tekst verzonden. Probeer de pagina te verversen.");
+            return false;
+        }
+
+        console.log("Artikel toevoegen aan Firestore:", article.title);
         const articles = await window.getArticles();
         const nextOrder = articles.length > 0 ? Math.max(...articles.map(a => a.order || 0)) + 1 : 0;
         
@@ -75,20 +95,30 @@ window.addArticle = async function(article) {
             ...article,
             order: nextOrder
         });
+        console.log("Artikel succesvol toegevoegd aan Firestore.");
         return true;
     } catch(e) {
-        console.error("Error adding document: ", e);
+        console.error("Error adding document to Firestore: ", e);
         return false;
     }
 };
 
 window.updateArticle = async function(id, updatedData) {
     try {
+        // Veiligheidscheck: Nooit meer Base64 strings naar Firestore sturen
+        if (updatedData.image && updatedData.image.startsWith('data:') && updatedData.image.length > 500000) {
+            console.error("Geweigerd: Afbeelding is te groot voor Firestore (Base64).");
+            alert("Systeemfout: De afbeelding wordt nog als grote tekst verzonden.");
+            return false;
+        }
+
+        console.log("Artikel bijwerken in Firestore ID:", id);
         const docRef = doc(db, "articles", id);
         await updateDoc(docRef, updatedData);
+        console.log("Artikel succesvol bijgewerkt.");
         return true;
     } catch (e) {
-        console.error("Error updating document: ", e);
+        console.error("Error updating document in Firestore: ", e);
         return false;
     }
 };
