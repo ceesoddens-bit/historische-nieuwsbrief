@@ -58,6 +58,10 @@
     <script type="module" src="app.js"></script>
     <script type="module">
         (async () => {
+            if (sessionStorage.getItem('hn_auth') !== 'true') {
+                window.location.href = 'login.html';
+                return;
+            }
             await window.renderAdminList();
             
             const list = document.getElementById('admin-article-list');

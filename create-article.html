@@ -86,6 +86,10 @@
     <script type="module" src="app.js"></script>
     <script type="module">
         (async () => {
+            if (sessionStorage.getItem('hn_auth') !== 'true') {
+                window.location.href = 'login.html';
+                return;
+            }
             const uploadBox = document.getElementById('image-preview');
             const uploadTrigger = document.getElementById('upload-trigger');
             const fileInput = document.getElementById('image-upload-input');

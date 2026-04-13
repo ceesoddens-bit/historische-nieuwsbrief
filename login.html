@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inloggen - Historische Nieuwsbrief</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigatiebalk -->
+    <nav class="admin-navbar">
+        <div class="admin-navbar-brand" style="display: flex; gap: 20px; align-items: center;">
+            <a href="index.html" class="admin-nav-link" style="font-size: 0.85rem; border: 1px solid #444; padding: 6px 12px; border-radius: 6px;">&larr; Naar site</a>
+            <span>HN Beheer</span>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="login-wrapper">
+        <div class="editor-card login-card">
+            <h2 class="editor-section-title" style="text-align: center; margin-bottom: 30px;">Inloggen</h2>
+            
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Gebruikersnaam</label>
+                    <input type="text" id="username" placeholder="Gebruikersnaam" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Wachtwoord</label>
+                    <input type="password" id="password" placeholder="Wachtwoord" required>
+                </div>
+
+                <p id="error-message" style="color: #dc2626; display: none; font-size: 0.9rem; margin-bottom: 20px; text-align: center;">Ongeldige gebruikersnaam of wachtwoord.</p>
+
+                <div class="editor-footer" style="justify-content: center;">
+                    <button type="submit" class="btn-primary" style="width: 100%;">Inloggen</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const un = document.getElementById('username').value.trim();
+            const pw = document.getElementById('password').value.trim();
+
+            if (un === 'admin' && pw === 'vrijthof') {
+                sessionStorage.setItem('hn_auth', 'true');
+                window.location.href = 'admin.html';
+            } else {
+                document.getElementById('error-message').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
