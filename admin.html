@@ -229,12 +229,7 @@
                     let finalHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
                     finalHTML = finalHTML.replace(/%2A%7C(.*?)%7C%2A/gi, '*|$1|*');
                     
-                    let webhookUrl = localStorage.getItem('google_doc_webhook_url');
-                    if (!webhookUrl) {
-                        webhookUrl = prompt("Voer de n8n Webhook URL in (deze wordt onthouden voor volgende keren):");
-                        if (!webhookUrl) throw new Error("Opslaan geannuleerd, geen URL opgegeven.");
-                        localStorage.setItem('google_doc_webhook_url', webhookUrl);
-                    }
+                    let webhookUrl = "https://ceesodd.app.n8n.cloud/webhook/e8710f1b-2044-4347-9c97-d37a25177107";
 
                     const postRes = await fetch(webhookUrl, {
                         method: 'POST',
@@ -248,9 +243,6 @@
                     });
 
                     if (!postRes.ok) {
-                        if (postRes.status === 404 || postRes.status === 401) {
-                            localStorage.removeItem('google_doc_webhook_url');
-                        }
                         throw new Error(`Webhook weigerde met status: ${postRes.status}`);
                     }
 
