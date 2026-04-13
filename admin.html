@@ -57,7 +57,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script type="module" src="app.js"></script>
     <script type="module">
-        document.addEventListener('DOMContentLoaded', async () => {
+        (async () => {
             await window.renderAdminList();
             
             const list = document.getElementById('admin-article-list');
@@ -212,7 +212,7 @@
                 }
             });
 
-        });
+        })();
     </script>
 </body>
 </html>
