@@ -29,6 +29,7 @@
             <h1>Artikeloverzicht</h1>
             <div style="display: flex; gap: 15px; align-items: center;">
                 <button id="export-n8n-btn" class="article-button" style="background: #2563eb; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Genereer n8n HTML</button>
+                <button id="update-doc-btn" class="article-button" style="background: #f97316; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Update HTML Doc</button>
                 <button id="preview-email-btn" class="article-button" style="background: #10b981; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Preview Nieuwsbrief</button>
                 <button id="save-order-btn" class="article-button" style="background: transparent; color: #111; cursor: pointer; border: 2px solid #111;">Volgorde Opslaan</button>
                 <a href="create-article.html" class="btn-primary">+ Nieuw Artikel</a>
@@ -169,13 +170,97 @@
                     
                     doc.querySelectorAll('[mc\\:edit]').forEach(el => el.removeAttribute('mc:edit'));
                     
-                    let finalHTML = "<!DOCTYPE html>\\n" + doc.documentElement.outerHTML;
+                    let finalHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
                     finalHTML = finalHTML.replace(/%2A%7C(.*?)%7C%2A/gi, '*|$1|*');
                     
                     textarea.value = finalHTML;
                     modal.style.display = 'flex';
                 } catch(e) {
                     alert('Kon template niet inladen. Als je dit opent zonder lokale server (file:// protocol) dan blokkeert de browser deze fetch actie (CORS). Zorg dat je github pages test-link draait.');
+                }
+            });
+
+            document.getElementById('update-doc-btn').addEventListener('click', async () => {
+                const btn = document.getElementById('update-doc-btn');
+                const originalText = btn.innerText;
+                
+                try {
+                    btn.innerText = "Bezig...";
+                    btn.disabled = true;
+                    
+                    const response = await fetch('email-wireframe.html');
+                    if(!response.ok) throw new Error("Netwerk error bij inladen wireframe");
+                    const htmlText = await response.text();
+                    
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, "text/html");
+                    const articles = await window.getArticles();
+                    
+                    const inject = (prefix, article) => {
+                        const articleUrl = `https://ceesoddens-bit.github.io/historische-nieuwsbrief/article-detail.html?id=${article.id}`;
+                        
+                        const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
+                        if(titleEl) {
+                            titleEl.innerHTML = `<a href="${articleUrl}" style="color: inherit; text-decoration: none;">${article.title}</a>`;
+                        }
+                        
+                        const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
+                        if(imgEl && article.image) {
+                            imgEl.src = article.image;
+                            const wrapper = doc.createElement('a');
+                            wrapper.href = articleUrl;
+                            wrapper.style.display = 'block';
+                            imgEl.parentNode.insertBefore(wrapper, imgEl);
+                            wrapper.appendChild(imgEl);
+                        }
+                        
+                        const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
+                        if(textEl) {
+                            textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel op website &rarr;</a>`;
+                        }
+                    };
+                    
+                    if(articles.length > 0) inject('hoofd', articles[0]);
+                    if(articles.length > 1) inject('sub1', articles[1]);
+                    if(articles.length > 2) inject('sub2', articles[2]);
+                    
+                    doc.querySelectorAll('[mc\\:edit]').forEach(el => el.removeAttribute('mc:edit'));
+                    
+                    let finalHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+                    finalHTML = finalHTML.replace(/%2A%7C(.*?)%7C%2A/gi, '*|$1|*');
+                    
+                    let webhookUrl = localStorage.getItem('google_doc_webhook_url');
+                    if (!webhookUrl) {
+                        webhookUrl = prompt("Voer de n8n Webhook URL in (deze wordt onthouden voor volgende keren):");
+                        if (!webhookUrl) throw new Error("Opslaan geannuleerd, geen URL opgegeven.");
+                        localStorage.setItem('google_doc_webhook_url', webhookUrl);
+                    }
+
+                    const postRes = await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            html: finalHTML,
+                            docId: "1Kd4EAoKHoZQ1ymHRxez2KgTIg4RqXwGbNNYfcCCN92I"
+                        })
+                    });
+
+                    if (!postRes.ok) {
+                        if (postRes.status === 404 || postRes.status === 401) {
+                            localStorage.removeItem('google_doc_webhook_url');
+                        }
+                        throw new Error(`Webhook weigerde met status: ${postRes.status}`);
+                    }
+
+                    alert("Document succesvol geüpdatet!");
+                    
+                } catch (e) {
+                    alert("Fout bij updaten document: " + e.message);
+                } finally {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
                 }
             });
 
