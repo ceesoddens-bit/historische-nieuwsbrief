@@ -28,6 +28,7 @@
         <div class="admin-header">
             <h1>Artikeloverzicht</h1>
             <div style="display: flex; gap: 15px; align-items: center;">
+                <button id="export-rss-btn" class="article-button" style="background: #f97316; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Genereer RSS XML</button>
                 <button id="export-html-btn" class="article-button" style="background: #dc2626; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Genereer Mailchimp HTML</button>
                 <button id="save-order-btn" class="article-button" style="background: transparent; color: #111; cursor: pointer; border: 2px solid #111;">Volgorde Opslaan</button>
                 <a href="create-article.html" class="btn-primary">+ Nieuw Artikel</a>
@@ -44,10 +45,10 @@
     <div id="export-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
         <div style="background: #fff; padding: 30px; border-radius: 12px; width: 90%; max-width: 800px; box-shadow: 0 25px 50px rgba(0,0,0,0.2);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 style="margin: 0; font-size: 1.5rem;">Gegenereerde Mailchimp Code</h2>
+                <h2 id="export-modal-title" style="margin: 0; font-size: 1.5rem;">Gegenereerde Mailchimp Code</h2>
                 <button id="close-modal-btn" style="background: none; border: none; font-size: 2rem; cursor: pointer;">&times;</button>
             </div>
-            <p style="margin-bottom: 15px; color: #555;">Kopieer deze code rechtsreeks naar een "Custom HTML" of code blok in je Mailchimp template. De content van je eigen artikelen staan er al in het DNS design in gebakken!</p>
+            <p id="export-modal-desc" style="margin-bottom: 15px; color: #555;">Kopieer deze code rechtsreeks naar een "Custom HTML" of code blok in je Mailchimp template.</p>
             <textarea id="export-textarea" style="width: 100%; height: 350px; font-family: monospace; padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.85rem;" readonly></textarea>
             <button id="copy-clipboard-btn" class="btn-primary" style="margin-top: 15px; display: block; width: 100%; text-align: center; border: none; cursor: pointer;">Kopieer naar Klembord</button>
         </div>
@@ -93,6 +94,9 @@
             });
             
             document.getElementById('export-html-btn').addEventListener('click', async () => {
+                document.getElementById('export-modal-title').innerText = "Gegenereerde Mailchimp Code";
+                document.getElementById('export-modal-desc').innerText = "Kopieer deze code rechtsreeks naar een 'Custom HTML' of code blok in je Mailchimp template. De content van je eigen artikelen staan er al in de DNS stijl gebakken!";
+                
                 try {
                     const response = await fetch('email-wireframe.html');
                     if(!response.ok) throw new Error("Netwerk error");
@@ -126,6 +130,41 @@
                 } catch(e) {
                     alert('Kon template niet inladen. Als je dit opent zonder lokale server (file:// protocol) dan blokkeert de browser deze fetch actie (CORS). Zorg dat je github pages test-link draait.');
                 }
+            });
+
+            document.getElementById('export-rss-btn').addEventListener('click', () => {
+                document.getElementById('export-modal-title').innerText = "Gegenereerde RSS XML";
+                document.getElementById('export-modal-desc').innerText = "Kopieer deze RSS valid XML en zet het in je feed platform of Mailchimp RSS integratie.";
+                
+                const articles = getArticles();
+                const siteUrl = "https://ceesoddens-bit.github.io/historische-nieuwsbrief/";
+                
+                let xml = '<?xml version="1.0" encoding="UTF-8" ?>\\n';
+                xml += '<rss version="2.0">\\n';
+                xml += '  <channel>\\n';
+                xml += '    <title>Historische Nieuwsbrief</title>\\n';
+                xml += `    <link>${siteUrl}</link>\\n`;
+                xml += '    <description>De verhalen die onze wereld hebben gevormd en de verborgen parels uit het verleden.</description>\\n';
+                xml += '    <language>nl-nl</language>\\n';
+                
+                articles.forEach(art => {
+                    const parsedDate = new Date(parseInt(art.id));
+                    const pubDate = isNaN(parsedDate.getTime()) ? new Date().toUTCString() : parsedDate.toUTCString();
+                    
+                    xml += '    <item>\\n';
+                    xml += `      <title><![CDATA[${art.title}]]></title>\\n`;
+                    xml += `      <link>${siteUrl}article-detail.html?id=${art.id}</link>\\n`;
+                    xml += `      <description><![CDATA[${art.content ? art.content : ''}]]></description>\\n`;
+                    xml += `      <pubDate>${pubDate}</pubDate>\\n`;
+                    xml += `      <guid>${siteUrl}article-detail.html?id=${art.id}</guid>\\n`;
+                    xml += '    </item>\\n';
+                });
+                
+                xml += '  </channel>\\n';
+                xml += '</rss>';
+                
+                textarea.value = xml;
+                modal.style.display = 'flex';
             });
         });
     </script>
