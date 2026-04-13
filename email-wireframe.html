@@ -11,6 +11,14 @@
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #2c2c2c; width: 100%;">
         <tr>
             <td align="center" style="padding: 60px 20px;">
+                <!-- Bekijk in browser -->
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px; margin-bottom: 15px;">
+                    <tr>
+                        <td align="center">
+                            <a href="*|ARCHIVE|*" style="color: #999999; font-size: 12px; text-decoration: underline;">Bekijk in browser</a>
+                        </td>
+                    </tr>
+                </table>
                 
                 <!-- Main Container (Hoofdkolom) - Zwevend vlak met donkerbruine achtergrond -->
                 <table width="600" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px; background-color: #8c6239; border-radius: 12px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);">
@@ -33,12 +41,14 @@
                             </table>
 
                             <!-- 2. Intro tekst -->
-                            <p style="font-size: 17px; line-height: 1.6; color: #111111; font-weight: bold; margin: 0 0 10px 0;">
-                                Goedemorgen geschiedenisvriend,
-                            </p>
-                            <p style="font-size: 15px; line-height: 1.8; color: #1a1a1a; margin: 0 0 40px 0;">
-                                Welkom bij de nieuwste editie van onze nieuwsbrief. Hier blikken we terug op de verhalen die onze wereld hebben gevormd en ontdekken we de verborgen parels uit het verleden. Ga met ons mee op reis door de tijd.
-                            </p>
+                            <div mc:edit="intro_tekst">
+                                <p style="font-size: 17px; line-height: 1.6; color: #111111; font-weight: bold; margin: 0 0 10px 0;">
+                                    Goedemorgen geschiedenisvriend,
+                                </p>
+                                <p style="font-size: 15px; line-height: 1.8; color: #1a1a1a; margin: 0 0 40px 0;">
+                                    Welkom bij de nieuwste editie van onze nieuwsbrief. Hier blikken we terug op de verhalen die onze wereld hebben gevormd en ontdekken we de verborgen parels uit het verleden. Ga met ons mee op reis door de tijd.
+                                </p>
+                            </div>
 
                             <!-- 3. Opvallende oranje scheidslijn -->
                             <hr style="border: none; border-top: 3px solid #f97316; margin: 0 0 40px 0;">
@@ -46,59 +56,65 @@
                             <!-- 4. Artikellijst -->
                             <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                 
-                                <!-- Artikel 1 -->
+                                <!-- Artikel 1 (Hoofd) -->
                                 <tr>
                                     <td style="padding-bottom: 30px;">
                                         <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                             <tr>
                                                 <td width="160" valign="top">
-                                                    <!-- Zwarte/grijze placeholder voor afbeelding -->
-                                                    <div style="width: 160px; height: 120px; background-color: #333333; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.2);"></div>
+                                                    <!-- Image element ipv div vereist voor Mailchimp image bewerking -->
+                                                    <img src="https://via.placeholder.com/160x120/333333/333333" width="160" height="120" mc:edit="hoofd_img" style="display: block; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
                                                 </td>
                                                 <td valign="top" style="padding-left: 25px;">
-                                                    <h2 style="margin: 0 0 12px 0; font-size: 22px; font-weight: bold; color: #ffffff; line-height: 1.3;">Het Bloedige Beleg van Parma in 1579</h2>
-                                                    <!-- Tekst placeholders -->
-                                                    <div style="width: 100%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px; margin-bottom: 10px;"></div>
-                                                    <div style="width: 85%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px; margin-bottom: 10px;"></div>
-                                                    <div style="width: 60%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px;"></div>
+                                                    <h2 mc:edit="hoofd_titel" style="margin: 0 0 12px 0; font-size: 22px; font-weight: bold; color: #ffffff; line-height: 1.3;">Het Bloedige Beleg van Parma in 1579</h2>
+                                                    <div mc:edit="hoofd_tekst">
+                                                        <!-- Tekst placeholders visueel simuleren maar nu in bewerkbaar veld -->
+                                                        <div style="width: 100%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px; margin-bottom: 10px;"></div>
+                                                        <div style="width: 85%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px; margin-bottom: 10px;"></div>
+                                                        <div style="width: 60%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px;"></div>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         </table>
                                     </td>
                                 </tr>
 
-                                <!-- Artikel 2 -->
+                                <!-- Artikel 2 (Sub) -->
                                 <tr>
                                     <td style="padding-bottom: 30px;">
                                         <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                             <tr>
                                                 <td width="160" valign="top">
-                                                    <div style="width: 160px; height: 120px; background-color: #333333; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.2);"></div>
+                                                    <img src="https://via.placeholder.com/160x120/333333/333333" width="160" height="120" mc:edit="sub1_img" style="display: block; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
                                                 </td>
                                                 <td valign="top" style="padding-left: 25px;">
-                                                    <h2 style="margin: 0 0 12px 0; font-size: 22px; font-weight: bold; color: #ffffff; line-height: 1.3;">De Laatste Adem van D'Artagnan bij de Tongersepoort</h2>
-                                                    <div style="width: 90%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px; margin-bottom: 10px;"></div>
-                                                    <div style="width: 100%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px; margin-bottom: 10px;"></div>
-                                                    <div style="width: 75%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px;"></div>
+                                                    <h2 mc:edit="sub1_titel" style="margin: 0 0 12px 0; font-size: 22px; font-weight: bold; color: #ffffff; line-height: 1.3;">De Laatste Adem van D'Artagnan bij de Tongersepoort</h2>
+                                                    <div mc:edit="sub1_tekst">
+                                                        <div style="width: 90%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px; margin-bottom: 10px;"></div>
+                                                        <div style="width: 100%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px; margin-bottom: 10px;"></div>
+                                                        <div style="width: 75%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px;"></div>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         </table>
                                     </td>
                                 </tr>
 
-                                <!-- Artikel 3 -->
+                                <!-- Artikel 3 (Sub) -->
                                 <tr>
                                     <td style="padding-bottom: 0;">
                                         <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                             <tr>
                                                 <td width="160" valign="top">
-                                                    <div style="width: 160px; height: 120px; background-color: #333333; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.2);"></div>
+                                                    <img src="https://via.placeholder.com/160x120/333333/333333" width="160" height="120" mc:edit="sub2_img" style="display: block; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
                                                 </td>
                                                 <td valign="top" style="padding-left: 25px;">
-                                                    <h2 style="margin: 0 0 12px 0; font-size: 22px; font-weight: bold; color: #ffffff; line-height: 1.3;">Petrus Regout en de Opkomst van de Sphinxfabrieken</h2>
-                                                    <div style="width: 100%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px; margin-bottom: 10px;"></div>
-                                                    <div style="width: 80%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px; margin-bottom: 10px;"></div>
-                                                    <div style="width: 50%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px;"></div>
+                                                    <h2 mc:edit="sub2_titel" style="margin: 0 0 12px 0; font-size: 22px; font-weight: bold; color: #ffffff; line-height: 1.3;">Petrus Regout en de Opkomst van de Sphinxfabrieken</h2>
+                                                    <div mc:edit="sub2_tekst">
+                                                        <div style="width: 100%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px; margin-bottom: 10px;"></div>
+                                                        <div style="width: 80%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px; margin-bottom: 10px;"></div>
+                                                        <div style="width: 50%; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 3px;"></div>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         </table>
@@ -115,7 +131,7 @@
                 <table width="600" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px; margin-top: 20px;">
                     <tr>
                         <td align="center">
-                            <a href="#" style="color: #888888; font-size: 13px; text-decoration: underline;">Uitschrijven van de nieuwsbrief</a>
+                            <a href="*|UNSUB|*" style="color: #888888; font-size: 13px; text-decoration: underline;">Uitschrijven van de nieuwsbrief</a>
                         </td>
                     </tr>
                 </table>
