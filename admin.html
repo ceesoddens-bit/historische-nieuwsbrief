@@ -29,8 +29,6 @@
             <h1>Artikeloverzicht</h1>
             <div style="display: flex; gap: 15px; align-items: center;">
                 <button id="export-n8n-btn" class="article-button" style="background: #2563eb; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Genereer n8n HTML</button>
-                <button id="export-rss-btn" class="article-button" style="background: #f97316; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Genereer RSS XML</button>
-                <button id="export-html-btn" class="article-button" style="background: #dc2626; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Genereer Mailchimp HTML</button>
                 <button id="save-order-btn" class="article-button" style="background: transparent; color: #111; cursor: pointer; border: 2px solid #111;">Volgorde Opslaan</button>
                 <a href="create-article.html" class="btn-primary">+ Nieuw Artikel</a>
             </div>
@@ -69,7 +67,16 @@
                     ghostClass: 'sortable-ghost',
                     dragClass: 'sortable-drag',
                     forceFallback: true,
-                    fallbackClass: 'sortable-drag'
+                    fallbackClass: 'sortable-drag',
+                    onEnd: function (evt) {
+                        const saveBtn = document.getElementById('save-order-btn');
+                        if (saveBtn) {
+                            saveBtn.style.background = '#dc2626';
+                            saveBtn.style.color = '#fff';
+                            saveBtn.style.border = '2px solid #dc2626';
+                            saveBtn.innerText = 'Volgorde Opslaan (Niet Opgeslagen)';
+                        }
+                    }
                 });
             }
             
@@ -77,6 +84,15 @@
                 const items = Array.from(list.children);
                 const newOrderIds = items.map(item => item.dataset.id);
                 reorderArticles(newOrderIds);
+                
+                const saveBtn = document.getElementById('save-order-btn');
+                if (saveBtn) {
+                    saveBtn.style.background = 'transparent';
+                    saveBtn.style.color = '#111';
+                    saveBtn.style.border = '2px solid #111';
+                    saveBtn.innerText = 'Volgorde Opslaan';
+                }
+                
                 alert('De nieuwe volgorde is succesvol opgeslagen en direct actief!');
             });
             
@@ -138,83 +154,6 @@
                 }
             });
 
-            document.getElementById('export-html-btn').addEventListener('click', async () => {
-                document.getElementById('export-modal-title').innerText = "Gegenereerde Mailchimp Code";
-                document.getElementById('export-modal-desc').innerText = "Kopieer deze code rechtsreeks naar een 'Custom HTML' of code blok in je Mailchimp template. De content van je eigen artikelen staan er al in de DNS stijl gebakken!";
-                defaultCopyText = "Kopieer naar Klembord";
-                copyBtn.innerText = defaultCopyText;
-                
-                try {
-                    const response = await fetch('email-wireframe.html');
-                    if(!response.ok) throw new Error("Netwerk error");
-                    const htmlText = await response.text();
-                    
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(htmlText, "text/html");
-                    const articles = getArticles();
-                    
-                    const inject = (prefix, article) => {
-                        const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
-                        if(titleEl) titleEl.innerText = article.title;
-                        
-                        const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
-                        if(imgEl && article.image) imgEl.src = article.image;
-                        
-                        const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
-                        if(textEl && article.content) textEl.innerHTML = `<p style="font-size: 15px; color: #f9f9f9; line-height: 1.6; margin: 0;">${article.content}</p>`;
-                    };
-                    
-                    if(articles.length > 0) inject('hoofd', articles[0]);
-                    if(articles.length > 1) inject('sub1', articles[1]);
-                    if(articles.length > 2) inject('sub2', articles[2]);
-                    
-                    let finalHTML = "<!DOCTYPE html>\\n" + doc.documentElement.outerHTML;
-                    // Herstel de per ongeluk URL encoded Mailchimp tags by the DOM parser
-                    finalHTML = finalHTML.replace(/%2A%7C(.*?)%7C%2A/gi, '*|$1|*');
-                    
-                    textarea.value = finalHTML;
-                    modal.style.display = 'flex';
-                } catch(e) {
-                    alert('Kon template niet inladen. Als je dit opent zonder lokale server (file:// protocol) dan blokkeert de browser deze fetch actie (CORS). Zorg dat je github pages test-link draait.');
-                }
-            });
-
-            document.getElementById('export-rss-btn').addEventListener('click', () => {
-                document.getElementById('export-modal-title').innerText = "Gegenereerde RSS XML";
-                document.getElementById('export-modal-desc').innerText = "Kopieer deze RSS valid XML en zet het in je feed platform of Mailchimp RSS integratie.";
-                defaultCopyText = "Kopieer naar Klembord";
-                copyBtn.innerText = defaultCopyText;
-                
-                const articles = getArticles();
-                const siteUrl = "https://ceesoddens-bit.github.io/historische-nieuwsbrief/";
-                
-                let xml = '<?xml version="1.0" encoding="UTF-8" ?>\\n';
-                xml += '<rss version="2.0">\\n';
-                xml += '  <channel>\\n';
-                xml += '    <title>Historische Nieuwsbrief</title>\\n';
-                xml += `    <link>${siteUrl}</link>\\n`;
-                xml += '    <description>De verhalen die onze wereld hebben gevormd en de verborgen parels uit het verleden.</description>\\n';
-                xml += '    <language>nl-nl</language>\\n';
-                
-                articles.forEach(art => {
-                    const parsedDate = new Date(parseInt(art.id));
-                    const pubDate = isNaN(parsedDate.getTime()) ? new Date().toUTCString() : parsedDate.toUTCString();
-                    
-                    xml += '    <item>\\n';
-                    xml += `      <title><![CDATA[${art.title}]]></title>\\n`;
-                    xml += `      <link>${siteUrl}article-detail.html?id=${art.id}</link>\\n`;
-                    xml += `      <description><![CDATA[${art.content ? art.content : ''}]]></description>\\n`;
-                    xml += `      <pubDate>${pubDate}</pubDate>\\n`;
-                    xml += `      <guid>${siteUrl}article-detail.html?id=${art.id}</guid>\\n`;
-                    xml += '    </item>\\n';
-                });
-                
-                xml += '  </channel>\\n';
-                xml += '</rss>';
-                
-                textarea.value = xml;
-                modal.style.display = 'flex';
-            });
         });
     </script>
 </body>
