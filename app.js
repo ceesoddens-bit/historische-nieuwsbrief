@@ -11,6 +11,12 @@ import {
     query, 
     orderBy 
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+import {
+    getStorage,
+    ref,
+    uploadBytes,
+    getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA98pJQz6VkoH3J9Fbkmajh37nHS1bP3Dc",
@@ -23,6 +29,24 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
+
+window.uploadImage = async function(file) {
+    if (!file) return null;
+    try {
+        const timestamp = Date.now();
+        // Remove spaces and weird chars from filename for safety
+        const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+        const storageRef = ref(storage, `images/${timestamp}_${safeName}`);
+        const snapshot = await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+    } catch (e) {
+        console.error("Error uploading image to Firebase Storage:", e);
+        alert("Fout bij uploaden afbeelding. Check of Storage in Firebase is geactiveerd en de regels goed staan.");
+        return null;
+    }
+};
 
 // Data fetching and mutation functions
 

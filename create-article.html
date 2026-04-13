@@ -74,7 +74,8 @@
             const fileInput = document.getElementById('image-upload-input');
             const publishBtn = document.getElementById('publish-btn');
             
-            let currentBase64 = '';
+            let currentFile = null;
+            let currentImageUrl = ''; // Keep track if we are editing an existing article
 
             const urlParams = new URLSearchParams(window.location.search);
             const editId = urlParams.get('id');
@@ -87,8 +88,8 @@
                     document.getElementById('article-title').value = article.title || '';
                     document.getElementById('article-content').value = article.content || '';
                     if (article.image) {
-                        currentBase64 = article.image;
-                        uploadBox.style.backgroundImage = `url('${currentBase64}')`;
+                        currentImageUrl = article.image; // this is the firebasestorage url
+                        uploadBox.style.backgroundImage = `url('${currentImageUrl}')`;
                         uploadBox.style.border = 'none';
                         uploadTrigger.style.display = 'none';
                     }
@@ -111,39 +112,12 @@
             fileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const MAX_WIDTH = 1000;
-                        const MAX_HEIGHT = 1000;
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > MAX_WIDTH) {
-                                height *= MAX_WIDTH / width;
-                                width = MAX_WIDTH;
-                            }
-                        } else {
-                            if (height > MAX_HEIGHT) {
-                                width *= MAX_HEIGHT / height;
-                                height = MAX_HEIGHT;
-                            }
-                        }
-
-                        const canvas = document.createElement('canvas');
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-
-                        // Comprimeer als JPEG
-                        currentBase64 = canvas.toDataURL('image/jpeg', 0.85);
-
-                        uploadBox.style.backgroundImage = `url('${currentBase64}')`;
-                        uploadBox.style.border = 'none';
-                        uploadTrigger.style.display = 'none';
-                    };
-                    img.src = URL.createObjectURL(file);
+                    currentFile = file;
+                    // Provide an instant local preview without uploading yet
+                    const localPreview = URL.createObjectURL(file);
+                    uploadBox.style.backgroundImage = `url('${localPreview}')`;
+                    uploadBox.style.border = 'none';
+                    uploadTrigger.style.display = 'none';
                 }
             });
 
@@ -157,22 +131,38 @@
                     return;
                 }
 
-                publishBtn.innerText = 'Bezig met opslaan...';
                 publishBtn.disabled = true;
+
+                // Step 1: Upload new image if selected
+                let imageToSave = currentImageUrl;
+                if (currentFile) {
+                    publishBtn.innerText = 'Foto uploaden...';
+                    const uploadedUrl = await window.uploadImage(currentFile);
+                    if (!uploadedUrl) {
+                        // Error is handled in app.js
+                        publishBtn.innerText = editId ? 'Opslaan' : 'Publiceren';
+                        publishBtn.disabled = false;
+                        return;
+                    }
+                    imageToSave = uploadedUrl;
+                }
+
+                // Step 2: Save metadata to Firestore
+                publishBtn.innerText = 'Bezig met opslaan...';
 
                 let success = false;
                 if (editId) {
                     success = await window.updateArticle(editId, {
                         title: title,
                         content: content,
-                        image: currentBase64
+                        image: imageToSave
                     });
                     if (success) alert('Artikel succesvol gewijzigd!');
                 } else {
                     success = await window.addArticle({
                         title: title,
                         content: content,
-                        image: currentBase64
+                        image: imageToSave
                     });
                     if (success) alert('Artikel succesvol gepubliceerd!');
                 }
