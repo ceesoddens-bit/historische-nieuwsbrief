@@ -33,33 +33,50 @@
         <div class="editor-card">
             <h2 class="editor-section-title">Kies je lay-out</h2>
             <div class="layout-picker">
-                Standaard: [Kop - Foto - Tekst]
+                <select id="layout-select" class="form-control" style="width: 100%; padding: 12px; font-size: 1rem; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; margin-top: 10px;">
+                    <option value="1">1: [Kop, Foto, Tekst]</option>
+                    <option value="2">2: [Kop, Foto, Tekst, Foto, Tekst]</option>
+                    <option value="3">3: [Kop, Tekst, Foto, Tekst]</option>
+                </select>
             </div>
         </div>
 
         <!-- Editor Velden -->
-        <div class="editor-card">
-            <h2 class="editor-section-title">Artikel Content</h2>
+        <div class="editor-card" id="editor-fields" style="display: flex; flex-direction: column;">
+            <h2 class="editor-section-title" style="order: 0;">Artikel Content</h2>
             
-            <div class="form-group">
+            <div class="form-group" id="title-group" style="order: 1;">
                 <label>Titel</label>
                 <input type="text" id="article-title" placeholder="Voer hier je pakkende titel in...">
             </div>
 
-            <div class="form-group">
-                <label>Foto</label>
+            <div class="form-group" id="image1-group" style="order: 2;">
+                <label id="image1-label">Foto</label>
                 <div class="image-upload-box" id="image-preview" style="background-size: cover; background-position: center; cursor: pointer;">
                     <button class="btn-upload" id="upload-trigger">Upload Afbeelding</button>
                     <input type="file" id="image-upload-input" accept="image/*" style="display:none;">
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Inhoud</label>
+            <div class="form-group" id="content1-group" style="order: 3;">
+                <label id="content1-label">Inhoud</label>
                 <textarea id="article-content" rows="12" placeholder="Typ hier de tekst van je artikel..."></textarea>
             </div>
 
-            <div class="editor-footer">
+            <div class="form-group" id="image2-group" style="order: 4; display: none;">
+                <label>Foto 2</label>
+                <div class="image-upload-box" id="image-preview-2" style="background-size: cover; background-position: center; cursor: pointer;">
+                    <button class="btn-upload" id="upload-trigger-2">Upload Afbeelding 2</button>
+                    <input type="file" id="image-upload-input-2" accept="image/*" style="display:none;">
+                </div>
+            </div>
+
+            <div class="form-group" id="content2-group" style="order: 5; display: none;">
+                <label>Inhoud 2</label>
+                <textarea id="article-content-2" rows="12" placeholder="Typ hier de tweede tekst..."></textarea>
+            </div>
+
+            <div class="editor-footer" style="order: 99; margin-top: 20px;">
                 <button id="publish-btn" class="btn-primary" style="display: inline-block; padding: 16px 40px; font-size: 1.1rem; text-align: center; border: none; cursor: pointer;">Publiceren</button>
             </div>
         </div>
@@ -72,14 +89,64 @@
             const uploadBox = document.getElementById('image-preview');
             const uploadTrigger = document.getElementById('upload-trigger');
             const fileInput = document.getElementById('image-upload-input');
+
+            const uploadBox2 = document.getElementById('image-preview-2');
+            const uploadTrigger2 = document.getElementById('upload-trigger-2');
+            const fileInput2 = document.getElementById('image-upload-input-2');
+
             const publishBtn = document.getElementById('publish-btn');
+            const layoutSelect = document.getElementById('layout-select');
+
+            const image2Group = document.getElementById('image2-group');
+            const content2Group = document.getElementById('content2-group');
+            const image1Group = document.getElementById('image1-group');
+            const content1Group = document.getElementById('content1-group');
+            const titleGroup = document.getElementById('title-group');
             
             let currentFile = null;
-            let currentImageUrl = ''; // Keep track if we are editing an existing article
+            let currentImageUrl = ''; 
+            
+            let currentFile2 = null;
+            let currentImageUrl2 = ''; 
 
             const urlParams = new URLSearchParams(window.location.search);
             const editId = urlParams.get('id');
             const pageTitle = document.querySelector('h1');
+
+            // Handle layout changes
+            const updateLayout = () => {
+                const layout = layoutSelect.value;
+                if (layout === '1') {
+                    // [Kop, Foto, Tekst]
+                    titleGroup.style.order = 1;
+                    image1Group.style.order = 2;
+                    content1Group.style.order = 3;
+                    
+                    image2Group.style.display = 'none';
+                    content2Group.style.display = 'none';
+                } else if (layout === '2') {
+                    // [Kop, Foto, Tekst, Foto, Tekst]
+                    titleGroup.style.order = 1;
+                    image1Group.style.order = 2;
+                    content1Group.style.order = 3;
+                    image2Group.style.order = 4;
+                    content2Group.style.order = 5;
+                    
+                    image2Group.style.display = 'block';
+                    content2Group.style.display = 'block';
+                } else if (layout === '3') {
+                    // [Kop, Tekst, Foto, Tekst]
+                    titleGroup.style.order = 1;
+                    content1Group.style.order = 2;
+                    image1Group.style.order = 3;
+                    content2Group.style.order = 4;
+                    
+                    image2Group.style.display = 'none';
+                    content2Group.style.display = 'block';
+                }
+            };
+
+            layoutSelect.addEventListener('change', updateLayout);
 
             if (editId) {
                 const articles = await window.getArticles();
@@ -87,33 +154,44 @@
                 if (article) {
                     document.getElementById('article-title').value = article.title || '';
                     document.getElementById('article-content').value = article.content || '';
+                    document.getElementById('article-content-2').value = article.content2 || '';
+                    
+                    if (article.layout) {
+                        layoutSelect.value = article.layout;
+                    }
+                    
                     if (article.image) {
-                        currentImageUrl = article.image; // this is the firebasestorage url
+                        currentImageUrl = article.image;
                         uploadBox.style.backgroundImage = `url('${currentImageUrl}')`;
                         uploadBox.style.border = 'none';
                         uploadTrigger.style.display = 'none';
                     }
+                    if (article.image2) {
+                        currentImageUrl2 = article.image2;
+                        uploadBox2.style.backgroundImage = `url('${currentImageUrl2}')`;
+                        uploadBox2.style.border = 'none';
+                        uploadTrigger2.style.display = 'none';
+                    }
                     if (pageTitle) pageTitle.textContent = "Artikel Bewerken";
                     publishBtn.textContent = "Opslaan";
+                    updateLayout();
                 }
             }
 
+            // Image 1 Handlers
             uploadTrigger.addEventListener('click', (e) => {
                 e.preventDefault();
                 fileInput.click();
             });
-            
             uploadBox.addEventListener('click', (e) => {
                 if(e.target !== uploadTrigger && e.target !== fileInput) {
                     fileInput.click();
                 }
             });
-
             fileInput.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
                     currentFile = file;
-                    // Provide an instant local preview without uploading yet
                     const localPreview = URL.createObjectURL(file);
                     uploadBox.style.backgroundImage = `url('${localPreview}')`;
                     uploadBox.style.border = 'none';
@@ -121,10 +199,33 @@
                 }
             });
 
+            // Image 2 Handlers
+            uploadTrigger2.addEventListener('click', (e) => {
+                e.preventDefault();
+                fileInput2.click();
+            });
+            uploadBox2.addEventListener('click', (e) => {
+                if(e.target !== uploadTrigger2 && e.target !== fileInput2) {
+                    fileInput2.click();
+                }
+            });
+            fileInput2.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    currentFile2 = file;
+                    const localPreview = URL.createObjectURL(file);
+                    uploadBox2.style.backgroundImage = `url('${localPreview}')`;
+                    uploadBox2.style.border = 'none';
+                    uploadTrigger2.style.display = 'none';
+                }
+            });
+
             publishBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 const title = document.getElementById('article-title').value;
                 const content = document.getElementById('article-content').value;
+                const content2 = document.getElementById('article-content-2').value;
+                const layout = layoutSelect.value;
                 
                 if(!title.trim()) {
                     alert('Vul in ieder geval een titel in.');
@@ -132,14 +233,13 @@
                 }
 
                 publishBtn.disabled = true;
+                publishBtn.innerText = 'Foto(s) uploaden...';
 
-                // Step 1: Upload new image if selected
+                // Step 1: Upload new images if selected
                 let imageToSave = currentImageUrl;
                 if (currentFile) {
-                    publishBtn.innerText = 'Foto uploaden...';
                     const uploadedUrl = await window.uploadImage(currentFile);
                     if (!uploadedUrl) {
-                        // Error is handled in app.js
                         publishBtn.innerText = editId ? 'Opslaan' : 'Publiceren';
                         publishBtn.disabled = false;
                         return;
@@ -147,23 +247,35 @@
                     imageToSave = uploadedUrl;
                 }
 
+                let image2ToSave = currentImageUrl2;
+                if (currentFile2 && (layout === '2')) {
+                    const uploadedUrl2 = await window.uploadImage(currentFile2);
+                    if (!uploadedUrl2) {
+                        publishBtn.innerText = editId ? 'Opslaan' : 'Publiceren';
+                        publishBtn.disabled = false;
+                        return;
+                    }
+                    image2ToSave = uploadedUrl2;
+                }
+
                 // Step 2: Save metadata to Firestore
                 publishBtn.innerText = 'Bezig met opslaan...';
 
+                const articleData = {
+                    title: title,
+                    content: content,
+                    content2: content2,
+                    layout: layout,
+                    image: imageToSave,
+                    image2: image2ToSave
+                };
+
                 let success = false;
                 if (editId) {
-                    success = await window.updateArticle(editId, {
-                        title: title,
-                        content: content,
-                        image: imageToSave
-                    });
+                    success = await window.updateArticle(editId, articleData);
                     if (success) alert('Artikel succesvol gewijzigd!');
                 } else {
-                    success = await window.addArticle({
-                        title: title,
-                        content: content,
-                        image: imageToSave
-                    });
+                    success = await window.addArticle(articleData);
                     if (success) alert('Artikel succesvol gepubliceerd!');
                 }
 

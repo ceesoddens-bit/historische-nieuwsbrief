@@ -26,18 +26,9 @@
     </nav>
 
     <!-- Artikel Detail Content -->
-    <main class="article-detail-container">
-        
-        <!-- Koptitel -->
+    <main class="article-detail-container" id="article-main-container">
+        <!-- Actief opgebouwd op basis van layout -->
         <h1 class="detail-title" id="detail-title">Laden...</h1>
-        
-        <!-- Foto -->
-        <div class="detail-hero-image" id="detail-hero-image"></div>
-        
-        <!-- Tekst -->
-        <article class="detail-content" id="detail-content">
-        </article>
-
     </main>
 
     <!-- Footer -->
@@ -60,23 +51,36 @@
             const article = articles.find(a => a.id === id) || articles[0]; // Fallback to first
             
             if (article) {
-                document.getElementById('detail-title').innerText = article.title;
+                const layout = article.layout || '1';
+                const container = document.getElementById('article-main-container');
                 
-                if (article.image) {
-                    const hero = document.getElementById('detail-hero-image');
-                    hero.style.backgroundImage = `url('${article.image}')`;
-                    hero.style.backgroundSize = 'cover';
-                    hero.style.backgroundPosition = 'center';
-                    hero.style.border = 'none';
+                const parseContent = (text) => {
+                    if (!text) return '';
+                    return text.split('\n').filter(p => p.trim() !== '').map(p => `<p>${p}</p>`).join('');
+                };
+
+                const titleHtml = `<h1 class="detail-title">${article.title}</h1>`;
+                const img1Html = article.image ? `<div class="detail-hero-image" style="background-image: url('${article.image}'); background-size: cover; background-position: center; border: none; margin-bottom: 2rem;"></div>` : '';
+                const img2Html = article.image2 ? `<div class="detail-hero-image" style="background-image: url('${article.image2}'); background-size: cover; background-position: center; border: none; margin-bottom: 2rem; margin-top: 2rem;"></div>` : '';
+                const text1Html = article.content ? `<article class="detail-content">${parseContent(article.content)}</article>` : '';
+                const text2Html = article.content2 ? `<article class="detail-content">${parseContent(article.content2)}</article>` : '';
+
+                if (layout === '1') {
+                    // [Kop, Foto, Tekst]
+                    container.innerHTML = titleHtml + img1Html + text1Html;
+                } else if (layout === '2') {
+                    // [Kop, Foto, Tekst, Foto, Tekst]
+                    container.innerHTML = titleHtml + img1Html + text1Html + img2Html + text2Html;
+                } else if (layout === '3') {
+                    // [Kop, Tekst, Foto, Tekst]
+                    container.innerHTML = titleHtml + text1Html + img1Html + text2Html;
+                } else {
+                    container.innerHTML = titleHtml + img1Html + text1Html;
                 }
                 
-                if (article.content) {
-                    // Zet tekst block om naar HTML en vang newlines op
-                    const paragraphs = article.content.split('\\n').filter(p => p.trim() !== '');
-                    document.getElementById('detail-content').innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
-                }
+                document.title = `${article.title} - Historische Nieuwsbrief`;
             } else {
-                document.getElementById('detail-title').innerText = "Artikel niet gevonden";
+                document.getElementById('article-main-container').innerHTML = '<h1 class="detail-title">Artikel niet gevonden</h1>';
             }
         })();
     </script>
