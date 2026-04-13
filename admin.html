@@ -28,6 +28,7 @@
         <div class="admin-header">
             <h1>Artikeloverzicht</h1>
             <div style="display: flex; gap: 15px; align-items: center;">
+                <button id="export-n8n-btn" class="article-button" style="background: #2563eb; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Genereer n8n HTML</button>
                 <button id="export-rss-btn" class="article-button" style="background: #f97316; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Genereer RSS XML</button>
                 <button id="export-html-btn" class="article-button" style="background: #dc2626; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Genereer Mailchimp HTML</button>
                 <button id="save-order-btn" class="article-button" style="background: transparent; color: #111; cursor: pointer; border: 2px solid #111;">Volgorde Opslaan</button>
@@ -85,17 +86,63 @@
             const copyBtn = document.getElementById('copy-clipboard-btn');
             const textarea = document.getElementById('export-textarea');
             
+            let defaultCopyText = "Kopieer naar Klembord";
+            
             closeBtn.addEventListener('click', () => modal.style.display = 'none');
             copyBtn.addEventListener('click', () => {
                 textarea.select();
                 document.execCommand('copy');
                 copyBtn.innerText = "Gekopieerd!";
-                setTimeout(() => copyBtn.innerText = "Kopieer naar Klembord", 2000);
+                setTimeout(() => copyBtn.innerText = defaultCopyText, 2000);
             });
             
+            document.getElementById('export-n8n-btn').addEventListener('click', async () => {
+                document.getElementById('export-modal-title').innerText = "Gegenereerde n8n HTML Code";
+                document.getElementById('export-modal-desc').innerText = "Kopieer deze code en gebruik het direct als Email node body in n8n. Alle elementen zijn als standalone HTML hardcoded ingevoerd en Mailchimp attributen zijn gestript.";
+                defaultCopyText = "Kopieer HTML voor n8n";
+                copyBtn.innerText = defaultCopyText;
+                
+                try {
+                    const response = await fetch('email-wireframe.html');
+                    if(!response.ok) throw new Error("Netwerk error");
+                    const htmlText = await response.text();
+                    
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, "text/html");
+                    const articles = getArticles();
+                    
+                    const inject = (prefix, article) => {
+                        const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
+                        if(titleEl) titleEl.innerText = article.title;
+                        
+                        const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
+                        if(imgEl && article.image) imgEl.src = article.image;
+                        
+                        const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
+                        if(textEl && article.content) textEl.innerHTML = `<p style="font-size: 15px; color: #f9f9f9; line-height: 1.6; margin: 0;">${article.content}</p>`;
+                    };
+                    
+                    if(articles.length > 0) inject('hoofd', articles[0]);
+                    if(articles.length > 1) inject('sub1', articles[1]);
+                    if(articles.length > 2) inject('sub2', articles[2]);
+                    
+                    doc.querySelectorAll('[mc\\:edit]').forEach(el => el.removeAttribute('mc:edit'));
+                    
+                    let finalHTML = "<!DOCTYPE html>\\n" + doc.documentElement.outerHTML;
+                    finalHTML = finalHTML.replace(/%2A%7C(.*?)%7C%2A/gi, '*|$1|*');
+                    
+                    textarea.value = finalHTML;
+                    modal.style.display = 'flex';
+                } catch(e) {
+                    alert('Kon template niet inladen. Als je dit opent zonder lokale server (file:// protocol) dan blokkeert de browser deze fetch actie (CORS). Zorg dat je github pages test-link draait.');
+                }
+            });
+
             document.getElementById('export-html-btn').addEventListener('click', async () => {
                 document.getElementById('export-modal-title').innerText = "Gegenereerde Mailchimp Code";
                 document.getElementById('export-modal-desc').innerText = "Kopieer deze code rechtsreeks naar een 'Custom HTML' of code blok in je Mailchimp template. De content van je eigen artikelen staan er al in de DNS stijl gebakken!";
+                defaultCopyText = "Kopieer naar Klembord";
+                copyBtn.innerText = defaultCopyText;
                 
                 try {
                     const response = await fetch('email-wireframe.html');
@@ -135,6 +182,8 @@
             document.getElementById('export-rss-btn').addEventListener('click', () => {
                 document.getElementById('export-modal-title').innerText = "Gegenereerde RSS XML";
                 document.getElementById('export-modal-desc').innerText = "Kopieer deze RSS valid XML en zet het in je feed platform of Mailchimp RSS integratie.";
+                defaultCopyText = "Kopieer naar Klembord";
+                copyBtn.innerText = defaultCopyText;
                 
                 const articles = getArticles();
                 const siteUrl = "https://ceesoddens-bit.github.io/historische-nieuwsbrief/";
