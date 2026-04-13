@@ -29,7 +29,18 @@ function getArticles() {
 }
 
 function saveArticles(articles) {
-    localStorage.setItem("hn_articles", JSON.stringify(articles));
+    try {
+        localStorage.setItem("hn_articles", JSON.stringify(articles));
+        return true;
+    } catch (e) {
+        console.error("Storage error:", e);
+        if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+            alert("Fout: Je hebt de limiet van je browseropslag bereikt (ca. 5MB). Verwijder eerst wat oude artikelen met grote foto's.");
+        } else {
+            alert("Er ging iets mis bij het opslaan van deze data.");
+        }
+        return false;
+    }
 }
 
 function addArticle(article) {
@@ -38,7 +49,7 @@ function addArticle(article) {
         id: Date.now().toString(),
         ...article
     });
-    saveArticles(articles);
+    return saveArticles(articles);
 }
 
 function updateArticle(id, updatedData) {
@@ -46,8 +57,9 @@ function updateArticle(id, updatedData) {
     const index = articles.findIndex(a => a.id === id);
     if (index !== -1) {
         articles[index] = { ...articles[index], ...updatedData };
-        saveArticles(articles);
+        return saveArticles(articles);
     }
+    return false;
 }
 
 function deleteArticle(id) {
