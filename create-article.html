@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nieuw Artikel - Historische Nieuwsbrief</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Admin Navigatiebalk -->
+    <nav class="admin-navbar">
+        <div class="admin-navbar-brand">HN Beheer</div>
+        <div class="admin-nav-links">
+            <a href="admin.html" class="admin-nav-link">Dashboard</a>
+            <a href="create-article.html" class="admin-nav-link active">Nieuw Artikel</a>
+            <a href="#" class="admin-nav-link">Instellingen</a>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="admin-container">
+        
+        <div class="admin-header">
+            <h1>Artikel Aanmaken</h1>
+        </div>
+
+        <!-- Layout Kiezer -->
+        <div class="editor-card">
+            <h2 class="editor-section-title">Kies je lay-out</h2>
+            <div class="layout-picker">
+                Standaard: [Kop - Foto - Tekst]
+            </div>
+        </div>
+
+        <!-- Editor Velden -->
+        <div class="editor-card">
+            <h2 class="editor-section-title">Artikel Content</h2>
+            
+            <div class="form-group">
+                <label>Titel</label>
+                <input type="text" id="article-title" placeholder="Voer hier je pakkende titel in...">
+            </div>
+
+            <div class="form-group">
+                <label>Foto</label>
+                <div class="image-upload-box" id="image-preview" style="background-size: cover; background-position: center; cursor: pointer;">
+                    <button class="btn-upload" id="upload-trigger">Upload Afbeelding</button>
+                    <input type="file" id="image-upload-input" accept="image/*" style="display:none;">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Inhoud</label>
+                <textarea id="article-content" rows="12" placeholder="Typ hier de tekst van je artikel..."></textarea>
+            </div>
+
+            <div class="editor-footer">
+                <button id="publish-btn" class="btn-primary" style="display: inline-block; padding: 16px 40px; font-size: 1.1rem; text-align: center; border: none; cursor: pointer;">Publiceren</button>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const uploadBox = document.getElementById('image-preview');
+            const uploadTrigger = document.getElementById('upload-trigger');
+            const fileInput = document.getElementById('image-upload-input');
+            const publishBtn = document.getElementById('publish-btn');
+            
+            let currentBase64 = '';
+
+            uploadTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                fileInput.click();
+            });
+            
+            uploadBox.addEventListener('click', (e) => {
+                if(e.target !== uploadTrigger && e.target !== fileInput) {
+                    fileInput.click();
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        currentBase64 = event.target.result;
+                        uploadBox.style.backgroundImage = `url('${currentBase64}')`;
+                        uploadBox.style.border = 'none';
+                        uploadTrigger.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            publishBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const title = document.getElementById('article-title').value;
+                const content = document.getElementById('article-content').value;
+                
+                if(!title.trim()) {
+                    alert('Vul in ieder geval een titel in.');
+                    return;
+                }
+
+                addArticle({
+                    title: title,
+                    content: content,
+                    image: currentBase64
+                });
+
+                alert('Artikel succesvol gepubliceerd!');
+                window.location.href = "admin.html";
+            });
+        });
+    </script>
+</body>
+</html>

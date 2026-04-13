@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artikel - Historische Nieuwsbrief</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Zwevende Navigatiebalk -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <div class="nav-logo">HN</div>
+            <div class="nav-titles">
+                <span class="nav-main-title">HISTORISCHE NIEUWSBRIEF</span>
+                <span class="nav-sub-title">"Carpe Diem, sed discite ex praeterito"</span>
+            </div>
+        </a>
+        <div class="nav-links">
+            <a href="#" class="nav-link">Tijdvakken</a>
+            <a href="#" class="nav-link">Locaties</a>
+            <a href="#" class="nav-link">Verhalen</a>
+            <a href="#" class="nav-link">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Artikel Detail Content -->
+    <main class="article-detail-container">
+        
+        <!-- Koptitel -->
+        <h1 class="detail-title" id="detail-title">Laden...</h1>
+        
+        <!-- Foto -->
+        <div class="detail-hero-image" id="detail-hero-image"></div>
+        
+        <!-- Tekst -->
+        <article class="detail-content" id="detail-content">
+        </article>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="#" class="footer-link">Privacybeleid</a>
+            <a href="#" class="footer-link">Algemene Voorwaarden</a>
+            <a href="#" class="footer-link">Contact</a>
+            <a href="admin.html" class="footer-link">Login</a>
+        </div>
+        <p style="color: #64748b; font-size: 0.9rem; margin: 0;">&copy; 2026 Historische Nieuwsbrief</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            const articles = getArticles();
+            const article = articles.find(a => a.id === id) || articles[0]; // Fallback to first
+            
+            if (article) {
+                document.getElementById('detail-title').innerText = article.title;
+                
+                if (article.image) {
+                    const hero = document.getElementById('detail-hero-image');
+                    hero.style.backgroundImage = `url('${article.image}')`;
+                    hero.style.backgroundSize = 'cover';
+                    hero.style.backgroundPosition = 'center';
+                    hero.style.border = 'none';
+                }
+                
+                if (article.content) {
+                    const paragraphs = article.content.split('\\n').filter(p => p.trim() !== '');
+                    document.getElementById('detail-content').innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

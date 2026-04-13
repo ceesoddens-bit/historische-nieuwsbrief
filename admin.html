@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Historische Nieuwsbrief</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Admin Navigatiebalk -->
+    <nav class="admin-navbar">
+        <div class="admin-navbar-brand">HN Beheer</div>
+        <div class="admin-nav-links">
+            <a href="admin.html" class="admin-nav-link active">Dashboard</a>
+            <a href="create-article.html" class="admin-nav-link">Nieuw Artikel</a>
+            <a href="#" class="admin-nav-link">Instellingen</a>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="admin-container">
+        
+        <div class="admin-header">
+            <h1>Artikeloverzicht</h1>
+            <div style="display: flex; gap: 15px;">
+                <button id="save-order-btn" class="article-button" style="background: transparent; color: #111; cursor: pointer; border: 2px solid #111;">Volgorde Opslaan</button>
+                <a href="create-article.html" class="btn-primary">+ Nieuw Artikel</a>
+            </div>
+        </div>
+
+        <div id="admin-article-list" class="draggable-list">
+            <!-- Dynamisch gevuld door JS -->
+        </div>
+            
+            <div class="draggable-item">
+                <div class="drag-handle">☰</div>
+                <a href="article-detail.html" class="draggable-title">De Mysterieuze Resten van de Romeinse Brug</a>
+                <a href="#" class="article-button" style="padding: 8px 16px; font-size: 0.85rem;">Bewerken</a>
+            </div>
+
+            <div class="draggable-item">
+                <div class="drag-handle">☰</div>
+                <a href="article-detail.html" class="draggable-title">Geheimen van de Helpoort en de Eerste Stadsmuur</a>
+                <a href="#" class="article-button" style="padding: 8px 16px; font-size: 0.85rem;">Bewerken</a>
+            </div>
+
+            <div class="draggable-item">
+                <div class="drag-handle">☰</div>
+                <a href="article-detail.html" class="draggable-title">Sint Servaas: De Eerste Bisschop van Nederland</a>
+                <a href="#" class="article-button" style="padding: 8px 16px; font-size: 0.85rem;">Bewerken</a>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAdminList();
+            
+            const list = document.getElementById('admin-article-list');
+            if(list) {
+                Sortable.create(list, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    forceFallback: true,
+                    fallbackClass: 'sortable-drag'
+                });
+            }
+            
+            document.getElementById('save-order-btn').addEventListener('click', () => {
+                const items = Array.from(list.children);
+                const newOrderIds = items.map(item => item.dataset.id);
+                reorderArticles(newOrderIds);
+                alert('De nieuwe volgorde is succesvol opgeslagen en direct actief!');
+            });
+        });
+    </script>
+</body>
+</html>

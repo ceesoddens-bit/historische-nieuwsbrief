@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historische Nieuwsbrief</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Zwevende Navigatiebalk -->
+    <nav class="navbar">
+        <a href="index.html" class="nav-brand">
+            <div class="nav-logo">HN</div>
+            <div class="nav-titles">
+                <span class="nav-main-title">HISTORISCHE NIEUWSBRIEF</span>
+                <span class="nav-sub-title">"Carpe Diem, sed discite ex praeterito"</span>
+            </div>
+        </a>
+        <div class="nav-links">
+            <a href="#" class="nav-link">Tijdvakken</a>
+            <a href="#" class="nav-link">Locaties</a>
+            <a href="#" class="nav-link">Verhalen</a>
+            <a href="#" class="nav-link">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Hero Sectie -->
+    <header class="hero">
+        <h1>Duik in het Verleden</h1>
+        <form class="subscribe-form">
+            <input type="email" placeholder="Jouw e-mailadres" required>
+            <button type="submit">Inschrijven</button>
+        </form>
+    </header>
+
+    <!-- Artikelen Sectie -->
+    <section class="articles-section" id="index-article-section">
+        <!-- Dynamisch gevuld via app.js -->
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="#" class="footer-link">Privacybeleid</a>
+            <a href="#" class="footer-link">Algemene Voorwaarden</a>
+            <a href="#" class="footer-link">Contact</a>
+            <a href="admin.html" class="footer-link">Login</a>
+        </div>
+        <p style="color: #64748b; font-size: 0.9rem; margin: 0;">&copy; 2026 Historische Nieuwsbrief</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderIndexList();
+        });
+    </script>
+</body>
+</html>
