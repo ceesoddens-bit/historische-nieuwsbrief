@@ -51,12 +51,12 @@
         <p style="color: #64748b; font-size: 0.9rem; margin: 0;">&copy; 2026 Historische Nieuwsbrief</p>
     </footer>
 
-    <script src="app.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    <script type="module" src="app.js"></script>
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
-            const articles = getArticles();
+            const articles = await window.getArticles();
             const article = articles.find(a => a.id === id) || articles[0]; // Fallback to first
             
             if (article) {
@@ -71,9 +71,12 @@
                 }
                 
                 if (article.content) {
+                    // Zet tekst block om naar HTML en vang newlines op
                     const paragraphs = article.content.split('\\n').filter(p => p.trim() !== '');
                     document.getElementById('detail-content').innerHTML = paragraphs.map(p => `<p>${p}</p>`).join('');
                 }
+            } else {
+                document.getElementById('detail-title').innerText = "Artikel niet gevonden";
             }
         });
     </script>

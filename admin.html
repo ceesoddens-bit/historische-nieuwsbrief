@@ -55,10 +55,10 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script src="app.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            renderAdminList();
+    <script type="module" src="app.js"></script>
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', async () => {
+            await window.renderAdminList();
             
             const list = document.getElementById('admin-article-list');
             if(list) {
@@ -81,17 +81,24 @@
                 });
             }
             
-            document.getElementById('save-order-btn').addEventListener('click', () => {
+            document.getElementById('save-order-btn').addEventListener('click', async () => {
                 const items = Array.from(list.children);
                 const newOrderIds = items.map(item => item.dataset.id);
-                reorderArticles(newOrderIds);
                 
                 const saveBtn = document.getElementById('save-order-btn');
+                if (saveBtn) {
+                    saveBtn.innerText = 'Bezig met synchroniseren...';
+                    saveBtn.disabled = true;
+                }
+                
+                await window.reorderArticles(newOrderIds);
+                
                 if (saveBtn) {
                     saveBtn.style.background = 'transparent';
                     saveBtn.style.color = '#111';
                     saveBtn.style.border = '2px solid #111';
                     saveBtn.innerText = 'Volgorde Opslaan';
+                    saveBtn.disabled = false;
                 }
                 
                 alert('De nieuwe volgorde is succesvol opgeslagen en direct actief!');
@@ -126,7 +133,7 @@
                     
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(htmlText, "text/html");
-                    const articles = getArticles();
+                    const articles = await window.getArticles();
                     
                     const inject = (prefix, article) => {
                         const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
@@ -163,7 +170,7 @@
                     
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(htmlText, "text/html");
-                    const articles = getArticles();
+                    const articles = await window.getArticles();
                     
                     const inject = (prefix, article) => {
                         const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);

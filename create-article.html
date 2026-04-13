@@ -66,9 +66,9 @@
 
     </main>
 
-    <script src="app.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    <script type="module" src="app.js"></script>
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', async () => {
             const uploadBox = document.getElementById('image-preview');
             const uploadTrigger = document.getElementById('upload-trigger');
             const fileInput = document.getElementById('image-upload-input');
@@ -81,7 +81,7 @@
             const pageTitle = document.querySelector('h1');
 
             if (editId) {
-                const articles = getArticles();
+                const articles = await window.getArticles();
                 const article = articles.find(a => a.id === editId);
                 if (article) {
                     document.getElementById('article-title').value = article.title || '';
@@ -147,7 +147,7 @@
                 }
             });
 
-            publishBtn.addEventListener('click', (e) => {
+            publishBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 const title = document.getElementById('article-title').value;
                 const content = document.getElementById('article-content').value;
@@ -157,16 +157,19 @@
                     return;
                 }
 
+                publishBtn.innerText = 'Bezig met opslaan...';
+                publishBtn.disabled = true;
+
                 let success = false;
                 if (editId) {
-                    success = updateArticle(editId, {
+                    success = await window.updateArticle(editId, {
                         title: title,
                         content: content,
                         image: currentBase64
                     });
                     if (success) alert('Artikel succesvol gewijzigd!');
                 } else {
-                    success = addArticle({
+                    success = await window.addArticle({
                         title: title,
                         content: content,
                         image: currentBase64
@@ -176,6 +179,9 @@
 
                 if (success) {
                     window.location.href = "admin.html";
+                } else {
+                    publishBtn.innerText = editId ? 'Opslaan' : 'Publiceren';
+                    publishBtn.disabled = false;
                 }
             });
         });

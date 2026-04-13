@@ -50,10 +50,10 @@
         <p style="color: #64748b; font-size: 0.9rem; margin: 0;">&copy; 2026 Historische Nieuwsbrief</p>
     </footer>
 
-    <script src="app.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            renderIndexList();
+    <script type="module" src="app.js"></script>
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', async () => {
+            await window.renderIndexList();
         });
     </script>
 </body>

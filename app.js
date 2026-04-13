@@ -1,86 +1,113 @@
-const DEFAULT_ARTICLES = [
-    {
-        id: "1",
-        title: "De Mysterieuze Resten van de Romeinse Brug",
-        image: "",
-        content: "De Romeinen bouwden een iconische brug over de Maas. Duizenden jaren later worden bij toeval tijdens baggerwerkzaamheden eeuwenoude houten pilaren ontdekt die de fundamenten blijken te zijn van dit imposante bouwwerk.\n\nDeze ontdekking werpt een nieuw licht op de strategische positie van Maastricht als 'Mosa Trajectum'. Archeologen spreken van een ongeëvenaarde vondst in West-Europa die de handel en mobiliteit van de Romeinse legioenen illustreert."
-    },
-    {
-        id: "2",
-        title: "Geheimen van de Helpoort en de Eerste Stadsmuur",
-        image: "",
-        content: "De Helpoort, de oudste nog bestaande stadspoort van Nederland, verbergt vele middeleeuwse geheimen. De poort werd gebouwd kort nadat Hendrik I van Brabant in 1229 toestemming gaf om de stad te omwallen.\n\nMaar wat gebeurde er achter de dikke stenen muren? Nieuw onderzoek toont aan dat de poort veel meer was dan een verdedigingswerk. Het deed dienst als ontmoetingsplaats, en later zelfs als opslag voor kruit. Luister naar de fluisterende wind en herbeleef de vroege verdediging van de stad."
-    },
-    {
-        id: "3",
-        title: "Sint Servaas: De Eerste Bisschop van Nederland",
-        image: "",
-        content: "Sint Servaas reisde in de vierde eeuw naar Maastricht en veranderde voor altijd de loop van de lokale en nationale geschiedenis. Als beschermheilige van de stad groeide zijn graf uit tot een pelgrimsoord van onschatbare waarde.\n\nVan de opgravingen onder de huidige Onze-Lieve-Vrouwebasiliek tot de verhalen en mythen; wie was deze charismatische leider werkelijk? Een diepgaande duik in de vroegchristelijke wortels van Nederland."
-    }
-];
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { 
+    getFirestore, 
+    collection, 
+    getDocs, 
+    addDoc, 
+    updateDoc, 
+    deleteDoc, 
+    doc, 
+    writeBatch, 
+    query, 
+    orderBy 
+} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-function getArticles() {
-    let articles = localStorage.getItem("hn_articles");
-    if (!articles) {
-        localStorage.setItem("hn_articles", JSON.stringify(DEFAULT_ARTICLES));
-        return DEFAULT_ARTICLES;
-    }
-    return JSON.parse(articles);
-}
+const firebaseConfig = {
+  apiKey: "AIzaSyA98pJQz6VkoH3J9Fbkmajh37nHS1bP3Dc",
+  authDomain: "historische-nieuwsbrief.firebaseapp.com",
+  projectId: "historische-nieuwsbrief",
+  storageBucket: "historische-nieuwsbrief.firebasestorage.app",
+  messagingSenderId: "782321372",
+  appId: "1:782321372:web:875a65cdc02e42496f5619"
+};
 
-function saveArticles(articles) {
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Data fetching and mutation functions
+
+window.getArticles = async function() {
     try {
-        localStorage.setItem("hn_articles", JSON.stringify(articles));
+        const q = query(collection(db, "articles"), orderBy("order", "asc"));
+        const querySnapshot = await getDocs(q);
+        const articles = [];
+        querySnapshot.forEach((docSnap) => {
+            articles.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        return articles;
+    } catch (error) {
+        console.error("Fout bij het ophalen van artikelen:", error);
+        return [];
+    }
+};
+
+window.addArticle = async function(article) {
+    try {
+        // Bepaal de hoogste order waarde zodat het artikel onderaan komt
+        const articles = await window.getArticles();
+        const nextOrder = articles.length > 0 ? Math.max(...articles.map(a => a.order || 0)) + 1 : 0;
+        
+        await addDoc(collection(db, "articles"), {
+            ...article,
+            order: nextOrder
+        });
+        return true;
+    } catch(e) {
+        console.error("Error adding document: ", e);
+        return false;
+    }
+};
+
+window.updateArticle = async function(id, updatedData) {
+    try {
+        const docRef = doc(db, "articles", id);
+        await updateDoc(docRef, updatedData);
         return true;
     } catch (e) {
-        console.error("Storage error:", e);
-        if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
-            alert("Fout: Je hebt de limiet van je browseropslag bereikt (ca. 5MB). Verwijder eerst wat oude artikelen met grote foto's.");
-        } else {
-            alert("Er ging iets mis bij het opslaan van deze data.");
-        }
+        console.error("Error updating document: ", e);
+        return false;
+    }
+};
+
+window.deleteArticle = async function(id) {
+    try {
+        await deleteDoc(doc(db, "articles", id));
+        return true;
+    } catch (e) {
+        console.error("Error deleting document: ", e);
         return false;
     }
 }
 
-function addArticle(article) {
-    const articles = getArticles();
-    articles.push({
-        id: Date.now().toString(),
-        ...article
-    });
-    return saveArticles(articles);
-}
-
-function updateArticle(id, updatedData) {
-    const articles = getArticles();
-    const index = articles.findIndex(a => a.id === id);
-    if (index !== -1) {
-        articles[index] = { ...articles[index], ...updatedData };
-        return saveArticles(articles);
+window.reorderArticles = async function(newOrderIds) {
+    try {
+        const batch = writeBatch(db);
+        newOrderIds.forEach((id, index) => {
+            const docRef = doc(db, "articles", id);
+            batch.update(docRef, { order: index });
+        });
+        await batch.commit();
+        return true;
+    } catch (e) {
+        console.error("Error batch updating orders: ", e);
+        return false;
     }
-    return false;
 }
 
-function deleteArticle(id) {
-    const articles = getArticles();
-    const updated = articles.filter(a => a.id !== id);
-    saveArticles(updated);
-}
+// Rendering functies
 
-function reorderArticles(newOrderIds) {
-    const articles = getArticles();
-    const ordered = newOrderIds.map(id => articles.find(a => a.id === id)).filter(Boolean);
-    saveArticles(ordered);
-}
-
-// Generates the correct aesthetic for index.html dynamically
-function renderIndexList() {
+window.renderIndexList = async function() {
     const section = document.getElementById('index-article-section');
     if (!section) return;
     
+    section.innerHTML = '<p style="text-align:center; padding: 40px; color: #666;">Artikelen laden...</p>';
+    const articles = await window.getArticles();
     section.innerHTML = '';
-    const articles = getArticles();
+    
+    if (articles.length === 0) {
+        section.innerHTML = '<p style="text-align:center; padding: 40px; color: #666;">Geen artikelen gevonden in Firebase.</p>';
+        return;
+    }
     
     articles.forEach(article => {
         let textPlaceholder = `
@@ -108,13 +135,18 @@ function renderIndexList() {
     });
 }
 
-// Generates the simple aesthetic list for admin.html dynamically
-function renderAdminList() {
+window.renderAdminList = async function() {
     const list = document.getElementById('admin-article-list');
     if (!list) return;
     
+    list.innerHTML = '<div style="padding: 20px; text-align: center;">Laden...</div>';
+    const articles = await window.getArticles();
     list.innerHTML = '';
-    const articles = getArticles();
+    
+    if (articles.length === 0) {
+        list.innerHTML = '<div style="padding: 20px; text-align: center;">Geen artikelen. Start met "+ Nieuw Artikel".</div>';
+        return;
+    }
     
     articles.forEach(article => {
         const div = document.createElement('div');
@@ -132,11 +164,15 @@ function renderAdminList() {
     });
 
     document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', async (e) => {
             const id = e.target.getAttribute('data-id');
             if (confirm('Weet je zeker dat je dit artikel wilt verwijderen?')) {
-                deleteArticle(id);
-                renderAdminList(); // Refresh list immediately
+                // Toon visueel dat ie bezig is met verwijderen
+                e.target.innerText = "Bezig...";
+                e.target.style.opacity = "0.5";
+                
+                await window.deleteArticle(id);
+                await window.renderAdminList(); // Refresh list immediately from Firestore
             }
         });
     });
