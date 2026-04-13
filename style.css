@@ -374,6 +374,31 @@ body {
     flex-grow: 1;
 }
 
+/* Dynamische Visuele Separator (bepaalt top 3 voor Nieuwsbrief) */
+.draggable-list > .draggable-item:nth-child(3),
+.draggable-list > .draggable-item:last-child:nth-child(1),
+.draggable-list > .draggable-item:last-child:nth-child(2) {
+    margin-bottom: 45px;
+    position: relative;
+}
+
+.draggable-list > .draggable-item:nth-child(3)::after,
+.draggable-list > .draggable-item:last-child:nth-child(1)::after,
+.draggable-list > .draggable-item:last-child:nth-child(2)::after {
+    content: '☝️ Bovenstaande artikelen komen in de Nieuwsbrief ☝️';
+    position: absolute;
+    bottom: -35px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #f97316;
+    font-weight: 800;
+    font-size: 0.9rem;
+    pointer-events: none;
+    border-top: 2px dashed #f97316;
+    padding-top: 12px;
+}
+
 /* Editor Formulier */
 .editor-card {
     background: #ffffff;
