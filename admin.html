@@ -142,8 +142,9 @@
                         const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
                         if(imgEl && article.image) imgEl.src = article.image;
                         
+                        // In de nieuwsbrief laten we de tekst nu weg, alleen de kop (titel) blijft staan
                         const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
-                        if(textEl && article.content) textEl.innerHTML = `<p style="font-size: 15px; color: #f9f9f9; line-height: 1.6; margin: 0;">${article.content}</p>`;
+                        if(textEl) textEl.innerHTML = "";
                     };
                     
                     if(articles.length > 0) inject('hoofd', articles[0]);
@@ -179,8 +180,9 @@
                         const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
                         if(imgEl && article.image) imgEl.src = article.image;
                         
+                        // In de nieuwsbrief laten we de tekst nu weg, alleen de kop (titel) blijft staan
                         const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
-                        if(textEl && article.content) textEl.innerHTML = `<p style="font-size: 15px; color: #f9f9f9; line-height: 1.6; margin: 0;">${article.content}</p>`;
+                        if(textEl) textEl.innerHTML = "";
                     };
                     
                     if(articles.length > 0) inject('hoofd', articles[0]);
