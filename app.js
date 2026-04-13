@@ -50,6 +50,12 @@ function updateArticle(id, updatedData) {
     }
 }
 
+function deleteArticle(id) {
+    const articles = getArticles();
+    const updated = articles.filter(a => a.id !== id);
+    saveArticles(updated);
+}
+
 function reorderArticles(newOrderIds) {
     const articles = getArticles();
     const ordered = newOrderIds.map(id => articles.find(a => a.id === id)).filter(Boolean);
@@ -105,8 +111,21 @@ function renderAdminList() {
         div.innerHTML = `
             <div class="drag-handle" title="Sleep om te verplaatsen">☰</div>
             <a href="article-detail.html?id=${article.id}" class="draggable-title">${article.title}</a>
-            <a href="create-article.html?id=${article.id}" class="article-button" style="padding: 8px 16px; font-size: 0.85rem;">Bewerken</a>
+            <div style="display: flex; gap: 10px;">
+                <a href="create-article.html?id=${article.id}" class="article-button" style="padding: 8px 16px; font-size: 0.85rem;">Bewerken</a>
+                <button class="article-button delete-btn" data-id="${article.id}" style="padding: 8px 16px; font-size: 0.85rem; background: #dc2626; color: white; border: none; cursor: pointer;">Verwijderen</button>
+            </div>
         `;
         list.appendChild(div);
+    });
+
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = e.target.getAttribute('data-id');
+            if (confirm('Weet je zeker dat je dit artikel wilt verwijderen?')) {
+                deleteArticle(id);
+                renderAdminList(); // Refresh list immediately
+            }
+        });
     });
 }
