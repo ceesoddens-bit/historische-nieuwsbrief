@@ -16,7 +16,7 @@
                 <span class="nav-sub-title">"Carpe Diem, sed discite ex praeterito"</span>
             </div>
         </a>
-        <div class="nav-links">
+        <div class="nav-links" id="nav-links">
             <a href="login.html" class="nav-link">Login</a>
             <a href="#" class="nav-link">Contact</a>
         </div>
@@ -44,6 +44,21 @@
         (async () => {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
+            if (sessionStorage.getItem('hn_auth') === 'true') {
+                const navLinks = document.getElementById('nav-links');
+                if (navLinks) {
+                    navLinks.innerHTML = `
+                        <a href="admin.html" class="nav-link" style="color: #dc2626; font-weight: 800;">Admin Panel</a>
+                        <a href="#" class="nav-link" id="logout-link">Logout</a>
+                        <a href="#" class="nav-link">Contact</a>
+                    `;
+                    document.getElementById('logout-link').addEventListener('click', () => {
+                        sessionStorage.removeItem('hn_auth');
+                        window.location.reload();
+                    });
+                }
+            }
+
             const articles = await window.getArticles();
             const article = articles.find(a => a.id === id) || articles[0]; // Fallback to first
             
