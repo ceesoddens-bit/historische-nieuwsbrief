@@ -501,6 +501,15 @@ body {
     margin-bottom: 50px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
 }
+.detail-image-caption {
+    font-size: 0.95rem;
+    color: #64748b;
+    font-style: italic;
+    margin-top: -35px;
+    margin-bottom: 40px;
+    text-align: center;
+    line-height: 1.4;
+}
 .detail-content {
     font-size: 1.25rem;
     line-height: 1.8;

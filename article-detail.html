@@ -60,8 +60,14 @@
                 const focal2 = article.focalPoint2 ? `${article.focalPoint2.x}% ${article.focalPoint2.y}%` : 'center';
 
                 const titleHtml = `<h1 class="detail-title">${article.title}</h1>`;
-                const img1Html = article.image ? `<div class="detail-hero-image" style="background-image: url('${article.image}'); background-size: cover; background-position: ${focal1}; border: none; margin-bottom: 2rem;"></div>` : '';
-                const img2Html = article.image2 ? `<div class="detail-hero-image" style="background-image: url('${article.image2}'); background-size: cover; background-position: ${focal2}; border: none; margin-bottom: 2rem; margin-top: 2rem;"></div>` : '';
+                const img1Html = article.image ? `
+                    <div class="detail-hero-image" style="background-image: url('${article.image}'); background-size: cover; background-position: ${focal1}; border: none; margin-bottom: ${article.imageCaption ? '10px' : '2rem'};"></div>
+                    ${article.imageCaption ? `<div class="detail-image-caption">${article.imageCaption}</div>` : ''}
+                ` : '';
+                const img2Html = article.image2 ? `
+                    <div class="detail-hero-image" style="background-image: url('${article.image2}'); background-size: cover; background-position: ${focal2}; border: none; margin-top: 2rem; margin-bottom: ${article.image2Caption ? '10px' : '2rem'};"></div>
+                    ${article.image2Caption ? `<div class="detail-image-caption">${article.image2Caption}</div>` : ''}
+                ` : '';
                 const text1Html = article.content ? `<article class="detail-content">${parseContent(article.content)}</article>` : '';
                 const text2Html = article.content2 ? `<article class="detail-content">${parseContent(article.content2)}</article>` : '';
 

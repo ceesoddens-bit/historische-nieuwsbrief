@@ -220,6 +220,8 @@
                             wrapper.href = articleUrl; wrapper.style.display = 'block';
                             imgEl.parentNode.insertBefore(wrapper, imgEl); wrapper.appendChild(imgEl);
                         }
+                        const captionEl = doc.querySelector(`[mc\\:edit="${prefix}_onderschrift"]`);
+                        if(captionEl) captionEl.innerHTML = article.imageCaption || '';
                         const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
                         if(textEl) textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel →</a>`;
                     };
@@ -277,6 +279,8 @@
                             wrapper.href = articleUrl; wrapper.style.display = 'block';
                             imgEl.parentNode.insertBefore(wrapper, imgEl); wrapper.appendChild(imgEl);
                         }
+                        const captionEl = doc.querySelector(`[mc\\:edit="${prefix}_onderschrift"]`);
+                        if(captionEl) captionEl.innerHTML = article.imageCaption || '';
                         const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
                         if(textEl) textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel →</a>`;
                     };
@@ -339,6 +343,8 @@
                             wrapper.href = articleUrl; wrapper.style.display = 'block';
                             imgEl.parentNode.insertBefore(wrapper, imgEl); wrapper.appendChild(imgEl);
                         }
+                        const captionEl = doc.querySelector(`[mc\\:edit="${prefix}_onderschrift"]`);
+                        if(captionEl) captionEl.innerHTML = article.imageCaption || '';
                         const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
                         if(textEl) textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel →</a>`;
                     };

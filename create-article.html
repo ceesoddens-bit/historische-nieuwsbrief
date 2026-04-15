@@ -56,6 +56,7 @@
                     <button class="btn-upload" id="upload-trigger">Upload Afbeelding</button>
                     <input type="file" id="image-upload-input" accept="image/*" style="display:none;">
                 </div>
+                <input type="text" id="article-image-caption" placeholder="Onderschrift voor deze foto..." style="margin-top: 8px; font-size: 0.9rem; padding: 10px 14px;">
             </div>
 
             <div class="form-group" id="content1-group" style="order: 3;">
@@ -70,6 +71,7 @@
                     <button class="btn-upload" id="upload-trigger-2">Upload Afbeelding 2</button>
                     <input type="file" id="image-upload-input-2" accept="image/*" style="display:none;">
                 </div>
+                <input type="text" id="article-image2-caption" placeholder="Onderschrift voor foto 2..." style="margin-top: 8px; font-size: 0.9rem; padding: 10px 14px;">
             </div>
 
             <div class="form-group" id="content2-group" style="order: 5; display: none;">
@@ -169,6 +171,8 @@
                     document.getElementById('article-title').value = article.title || '';
                     document.getElementById('article-content').value = article.content || '';
                     document.getElementById('article-content-2').value = article.content2 || '';
+                    document.getElementById('article-image-caption').value = article.imageCaption || '';
+                    document.getElementById('article-image2-caption').value = article.image2Caption || '';
                     
                     if (article.layout) {
                         layoutSelect.value = article.layout;
@@ -288,6 +292,8 @@
                 const title = document.getElementById('article-title').value;
                 const content = document.getElementById('article-content').value;
                 const content2 = document.getElementById('article-content-2').value;
+                const imageCaption = document.getElementById('article-image-caption').value;
+                const image2Caption = document.getElementById('article-image2-caption').value;
                 const layout = layoutSelect.value;
                 
                 if(!title.trim()) {
@@ -331,6 +337,8 @@
                     layout: layout,
                     image: imageToSave,
                     image2: image2ToSave,
+                    imageCaption: imageCaption,
+                    image2Caption: image2Caption,
                     focalPoint1: focalPoint1,
                     focalPoint2: focalPoint2
                 };
