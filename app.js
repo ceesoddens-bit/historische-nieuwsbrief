@@ -173,7 +173,8 @@ window.renderIndexList = async function() {
             textPlaceholder = `<p style="margin-bottom:20px; font-size:1.05rem; color:#444;">${article.content.substring(0, 150)}...</p>`;
         }
 
-        const bgStyle = article.image ? `background-image: url('${article.image}'); background-size: cover; background-position: center; border: none;` : '';
+        const focal = article.focalPoint1 ? `${article.focalPoint1.x}% ${article.focalPoint1.y}%` : 'center';
+        const bgStyle = article.image ? `background-image: url('${article.image}'); background-size: cover; background-position: ${focal}; border: none;` : '';
 
         const articleHTML = `
         <article class="article-card">

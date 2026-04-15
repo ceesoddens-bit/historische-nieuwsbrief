@@ -211,6 +211,11 @@
                         const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
                         if(imgEl && article.image) {
                             imgEl.src = article.image;
+                            // Pas focal point toe voor e-mail clients die object-fit ondersteunen
+                            const focal = article.focalPoint1 ? `${article.focalPoint1.x}% ${article.focalPoint1.y}%` : 'center';
+                            imgEl.style.objectFit = 'cover';
+                            imgEl.style.objectPosition = focal;
+                            
                             const wrapper = doc.createElement('a');
                             wrapper.href = articleUrl; wrapper.style.display = 'block';
                             imgEl.parentNode.insertBefore(wrapper, imgEl); wrapper.appendChild(imgEl);
@@ -263,6 +268,11 @@
                         const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
                         if(imgEl && article.image) {
                             imgEl.src = article.image;
+                            // Pas focal point toe voor e-mail clients die object-fit ondersteunen
+                            const focal = article.focalPoint1 ? `${article.focalPoint1.x}% ${article.focalPoint1.y}%` : 'center';
+                            imgEl.style.objectFit = 'cover';
+                            imgEl.style.objectPosition = focal;
+
                             const wrapper = doc.createElement('a');
                             wrapper.href = articleUrl; wrapper.style.display = 'block';
                             imgEl.parentNode.insertBefore(wrapper, imgEl); wrapper.appendChild(imgEl);

@@ -647,6 +647,74 @@ body {
 
 
 
+/* ============================================================
+   EDITOR: FOCAL POINT PICKER
+   ============================================================ */
+
+.btn-upload.btn-replace {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    background: rgba(255, 255, 255, 0.9);
+    color: #111;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 20;
+    width: auto;
+    margin: 0;
+}
+
+.btn-upload.btn-replace:hover {
+    background: #ffffff;
+    transform: translateY(-2px);
+}
+
+.image-upload-box {
+    position: relative;
+    overflow: hidden;
+}
+
+.focal-point-marker {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #ffffff;
+    background: rgba(220, 38, 38, 0.4);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    display: none; /* Verborgen tot een foto is geüpload */
+    z-index: 10;
+    transition: left 0.2s ease, top 0.2s ease;
+}
+
+.image-upload-box.has-image .focal-point-marker {
+    display: block;
+}
+
+.image-upload-box.has-image::after {
+    content: "Klik op de foto om het focuspunt te veranderen";
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-upload-box.has-image:hover::after {
+    opacity: 1;
+}
+
 @media (max-width: 768px) {
     .navbar {
         flex-direction: column;

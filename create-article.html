@@ -52,6 +52,7 @@
             <div class="form-group" id="image1-group" style="order: 2;">
                 <label id="image1-label">Foto</label>
                 <div class="image-upload-box" id="image-preview" style="background-size: cover; background-position: center; cursor: pointer;">
+                    <div class="focal-point-marker" id="marker1"></div>
                     <button class="btn-upload" id="upload-trigger">Upload Afbeelding</button>
                     <input type="file" id="image-upload-input" accept="image/*" style="display:none;">
                 </div>
@@ -65,6 +66,7 @@
             <div class="form-group" id="image2-group" style="order: 4; display: none;">
                 <label>Foto 2</label>
                 <div class="image-upload-box" id="image-preview-2" style="background-size: cover; background-position: center; cursor: pointer;">
+                    <div class="focal-point-marker" id="marker2"></div>
                     <button class="btn-upload" id="upload-trigger-2">Upload Afbeelding 2</button>
                     <input type="file" id="image-upload-input-2" accept="image/*" style="display:none;">
                 </div>
@@ -108,10 +110,19 @@
             
             let currentFile = null;
             let currentImageUrl = ''; 
+            let focalPoint1 = { x: 50, y: 50 };
             
             let currentFile2 = null;
             let currentImageUrl2 = ''; 
+            let focalPoint2 = { x: 50, y: 50 };
 
+            const marker1 = document.getElementById('marker1');
+            const marker2 = document.getElementById('marker2');
+
+            const updateFocalMarker = (marker, focal) => {
+                marker.style.left = focal.x + '%';
+                marker.style.top = focal.y + '%';
+            };
             const urlParams = new URLSearchParams(window.location.search);
             const editId = urlParams.get('id');
             const pageTitle = document.querySelector('h1');
@@ -167,13 +178,27 @@
                         currentImageUrl = article.image;
                         uploadBox.style.backgroundImage = `url('${currentImageUrl}')`;
                         uploadBox.style.border = 'none';
-                        uploadTrigger.style.display = 'none';
+                        uploadTrigger.innerText = 'Foto wijzigen';
+                        uploadTrigger.classList.add('btn-replace');
+                        uploadBox.classList.add('has-image');
+                        if (article.focalPoint1) {
+                            focalPoint1 = article.focalPoint1;
+                            updateFocalMarker(marker1, focalPoint1);
+                            uploadBox.style.backgroundPosition = `${focalPoint1.x}% ${focalPoint1.y}%`;
+                        }
                     }
                     if (article.image2) {
                         currentImageUrl2 = article.image2;
                         uploadBox2.style.backgroundImage = `url('${currentImageUrl2}')`;
                         uploadBox2.style.border = 'none';
-                        uploadTrigger2.style.display = 'none';
+                        uploadTrigger2.innerText = 'Foto wijzigen';
+                        uploadTrigger2.classList.add('btn-replace');
+                        uploadBox2.classList.add('has-image');
+                        if (article.focalPoint2) {
+                            focalPoint2 = article.focalPoint2;
+                            updateFocalMarker(marker2, focalPoint2);
+                            uploadBox2.style.backgroundPosition = `${focalPoint2.x}% ${focalPoint2.y}%`;
+                        }
                     }
                     if (pageTitle) pageTitle.textContent = "Artikel Bewerken";
                     publishBtn.textContent = "Opslaan";
@@ -183,11 +208,12 @@
 
             // Image 1 Handlers
             uploadTrigger.addEventListener('click', (e) => {
-                e.preventDefault();
+                e.stopPropagation(); // Voorkom dat focal point trigger ook vinkt
                 fileInput.click();
             });
             uploadBox.addEventListener('click', (e) => {
-                if(e.target !== uploadTrigger && e.target !== fileInput) {
+                // Alleen uploaden als er nog geen foto is
+                if(!uploadBox.classList.contains('has-image')) {
                     fileInput.click();
                 }
             });
@@ -198,17 +224,34 @@
                     const localPreview = URL.createObjectURL(file);
                     uploadBox.style.backgroundImage = `url('${localPreview}')`;
                     uploadBox.style.border = 'none';
-                    uploadTrigger.style.display = 'none';
+                    uploadTrigger.innerText = 'Foto wijzigen';
+                    uploadTrigger.classList.add('btn-replace');
+                    uploadBox.classList.add('has-image');
+                    // Reset focal point for new upload
+                    focalPoint1 = { x: 50, y: 50 };
+                    updateFocalMarker(marker1, focalPoint1);
+                    uploadBox.style.backgroundPosition = '50% 50%';
                 }
+            });
+
+            // Focal Point Picking logic for image 1
+            uploadBox.addEventListener('mousedown', (e) => {
+                if (!uploadBox.classList.contains('has-image')) return;
+                const rect = uploadBox.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                focalPoint1 = { x: Math.round(x), y: Math.round(y) };
+                updateFocalMarker(marker1, focalPoint1);
+                uploadBox.style.backgroundPosition = `${focalPoint1.x}% ${focalPoint1.y}%`;
             });
 
             // Image 2 Handlers
             uploadTrigger2.addEventListener('click', (e) => {
-                e.preventDefault();
+                e.stopPropagation();
                 fileInput2.click();
             });
             uploadBox2.addEventListener('click', (e) => {
-                if(e.target !== uploadTrigger2 && e.target !== fileInput2) {
+                if(!uploadBox2.classList.contains('has-image')) {
                     fileInput2.click();
                 }
             });
@@ -219,8 +262,25 @@
                     const localPreview = URL.createObjectURL(file);
                     uploadBox2.style.backgroundImage = `url('${localPreview}')`;
                     uploadBox2.style.border = 'none';
-                    uploadTrigger2.style.display = 'none';
+                    uploadTrigger2.innerText = 'Foto wijzigen';
+                    uploadTrigger2.classList.add('btn-replace');
+                    uploadBox2.classList.add('has-image');
+                    // Reset focal point for new upload
+                    focalPoint2 = { x: 50, y: 50 };
+                    updateFocalMarker(marker2, focalPoint2);
+                    uploadBox2.style.backgroundPosition = '50% 50%';
                 }
+            });
+
+            // Focal Point Picking logic for image 2
+            uploadBox2.addEventListener('mousedown', (e) => {
+                if (!uploadBox2.classList.contains('has-image')) return;
+                const rect = uploadBox2.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                focalPoint2 = { x: Math.round(x), y: Math.round(y) };
+                updateFocalMarker(marker2, focalPoint2);
+                uploadBox2.style.backgroundPosition = `${focalPoint2.x}% ${focalPoint2.y}%`;
             });
 
             publishBtn.addEventListener('click', async (e) => {
@@ -270,7 +330,9 @@
                     content2: content2,
                     layout: layout,
                     image: imageToSave,
-                    image2: image2ToSave
+                    image2: image2ToSave,
+                    focalPoint1: focalPoint1,
+                    focalPoint2: focalPoint2
                 };
 
                 let success = false;
