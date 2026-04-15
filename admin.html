@@ -10,31 +10,95 @@
 
     <!-- Admin Navigatiebalk -->
     <nav class="admin-navbar">
-        <div class="admin-navbar-brand" style="display: flex; gap: 20px; align-items: center;">
-            <a href="index.html" class="admin-nav-link" style="font-size: 0.85rem; border: 1px solid #444; padding: 6px 12px; border-radius: 6px;">&larr; Naar site</a>
+        <div class="admin-navbar-brand" style="display: flex; gap: 16px; align-items: center;">
+            <div class="nav-logo" style="width:40px;height:40px;font-size:1rem;">HN</div>
             <span>HN Beheer</span>
         </div>
         <div class="admin-nav-links">
             <a href="admin.html" class="admin-nav-link active">Dashboard</a>
-            <a href="create-article.html" class="admin-nav-link">Nieuw Artikel</a>
-            <a href="email-wireframe.html" target="_blank" class="admin-nav-link">Preview Nieuwsbrief</a>
-            <a href="#" class="admin-nav-link">Instellingen</a>
+            <a href="index.html" class="admin-nav-link">&larr; Naar site</a>
         </div>
     </nav>
+
+    <!-- Workflow Toolbar -->
+    <div class="workflow-toolbar">
+        <div class="workflow-steps">
+
+            <!-- Stap 1: Nieuw artikel -->
+            <a href="create-article.html" class="workflow-step step-create" id="step1">
+                <span class="step-number">1</span>
+                <div class="step-body">
+                    <span class="step-label">Nieuw Artikel</span>
+                    <span class="step-hint">Schrijf &amp; bewerk</span>
+                </div>
+                <span class="step-icon">✏️</span>
+            </a>
+
+            <div class="step-arrow">›</div>
+
+            <!-- Stap 2: Volgorde opslaan -->
+            <button class="workflow-step step-save" id="save-order-btn">
+                <span class="step-number">2</span>
+                <div class="step-body">
+                    <span class="step-label">Volgorde Opslaan</span>
+                    <span class="step-hint">Sleep &amp; bewaar</span>
+                </div>
+                <span class="step-icon">💾</span>
+            </button>
+
+            <div class="step-arrow">›</div>
+
+            <!-- Stap 3: Preview nieuwsbrief -->
+            <button class="workflow-step step-preview" id="preview-email-btn">
+                <span class="step-number">3</span>
+                <div class="step-body">
+                    <span class="step-label">Preview</span>
+                    <span class="step-hint">Nieuwsbrief bekijken</span>
+                </div>
+                <span class="step-icon">👁️</span>
+            </button>
+
+            <div class="step-arrow">›</div>
+
+            <!-- Stap 4: Update HTML -->
+            <button class="workflow-step step-update" id="update-doc-btn">
+                <span class="step-number">4</span>
+                <div class="step-body">
+                    <span class="step-label">Update HTML</span>
+                    <span class="step-hint">Naar Mailchimp doc</span>
+                </div>
+                <span class="step-icon">🔄</span>
+            </button>
+
+            <div class="step-arrow">›</div>
+
+            <!-- Stap 5: Test mail -->
+            <button class="workflow-step step-testmail" id="test-mail-btn">
+                <span class="step-number">5</span>
+                <div class="step-body">
+                    <span class="step-label">Zend Test Mail</span>
+                    <span class="step-hint">Controleer e-mail</span>
+                </div>
+                <span class="step-icon">📧</span>
+            </button>
+
+        </div>
+
+        <!-- Stap 6: Automatisch verzenden badge -->
+        <div class="auto-send-badge">
+            <span class="auto-send-icon">🕕</span>
+            <div>
+                <span class="auto-send-title">Automatisch verzonden</span>
+                <span class="auto-send-sub">Elke vrijdag om 06:00 wordt de meest recent bijgewerkte versie verzonden</span>
+            </div>
+        </div>
+    </div>
 
     <!-- Content -->
     <main class="admin-container">
         
         <div class="admin-header">
             <h1>Artikeloverzicht</h1>
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <button id="preview-email-btn" class="article-button" style="background: #10b981; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Preview Nieuwsbrief</button>
-                <button id="update-doc-btn" class="article-button" style="background: #f97316; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Update html</button>
-                <button id="test-mail-btn" class="article-button" style="background: #8b5cf6; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Zend test mail</button>
-                <button id="save-order-btn" class="article-button" style="background: transparent; color: #111; cursor: pointer; border: 2px solid #111;">Volgorde Opslaan</button>
-                <a href="index.html" class="article-button" style="background: #eee; color: #111; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px; text-decoration: none;">&larr; Naar site</a>
-                <a href="create-article.html" class="btn-primary">+ Nieuw Artikel</a>
-            </div>
         </div>
 
         <div id="admin-article-list" class="draggable-list">
@@ -64,10 +128,9 @@
                     onEnd: function (evt) {
                         const saveBtn = document.getElementById('save-order-btn');
                         if (saveBtn) {
-                            saveBtn.style.background = '#dc2626';
-                            saveBtn.style.color = '#fff';
-                            saveBtn.style.border = '2px solid #dc2626';
-                            saveBtn.innerText = 'Volgorde Opslaan (Niet Opgeslagen)';
+                            saveBtn.classList.add('unsaved');
+                            saveBtn.querySelector('.step-label').innerText = 'Opslaan!';
+                            saveBtn.querySelector('.step-hint').innerText = 'Niet-opgeslagen wijzigingen';
                         }
                     }
                 });
@@ -78,19 +141,22 @@
                 const newOrderIds = items.map(item => item.dataset.id);
                 
                 const saveBtn = document.getElementById('save-order-btn');
+                const labelEl = saveBtn ? saveBtn.querySelector('.step-label') : null;
+                const hintEl  = saveBtn ? saveBtn.querySelector('.step-hint')  : null;
+
                 if (saveBtn) {
-                    saveBtn.innerText = 'Bezig met synchroniseren...';
                     saveBtn.disabled = true;
+                    if (labelEl) labelEl.innerText = 'Synchroniseren...';
+                    if (hintEl)  hintEl.innerText  = 'Even geduld';
                 }
                 
                 await window.reorderArticles(newOrderIds);
                 
                 if (saveBtn) {
-                    saveBtn.style.background = 'transparent';
-                    saveBtn.style.color = '#111';
-                    saveBtn.style.border = '2px solid #111';
-                    saveBtn.innerText = 'Volgorde Opslaan';
+                    saveBtn.classList.remove('unsaved');
                     saveBtn.disabled = false;
+                    if (labelEl) labelEl.innerText = 'Volgorde Opslaan';
+                    if (hintEl)  hintEl.innerText  = 'Sleep & bewaar';
                 }
                 
                 alert('De nieuwe volgorde is succesvol opgeslagen!');
