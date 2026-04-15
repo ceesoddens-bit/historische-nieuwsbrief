@@ -138,6 +138,19 @@
             // ─────────────────────────────────────────────────────────────
             
             const list = document.getElementById('admin-article-list');
+
+            // Observe list changes (deletions/reorders) to trigger urgency
+            const observer = new MutationObserver((mutations) => {
+                const hadChange = mutations.some(m => m.type === 'childList');
+                if (hadChange) {
+                    wf.save = 'urgent';
+                    wf.update = 'urgent';
+                    saveState(wf);
+                    applyState(wf);
+                }
+            });
+            if (list) observer.observe(list, { childList: true });
+
             if(list) {
                 Sortable.create(list, {
                     animation: 150,
@@ -146,191 +159,41 @@
                     forceFallback: true,
                     fallbackClass: 'sortable-drag',
                     onEnd: function (evt) {
-                        const saveBtn = document.getElementById('save-order-btn');
-                        if (saveBtn) {
-                            saveBtn.classList.add('unsaved');
-                            saveBtn.querySelector('.step-label').innerText = 'Opslaan!';
-                            saveBtn.querySelector('.step-hint').innerText = 'Niet-opgeslagen wijzigingen';
-                        }
+                        // Handled by MutationObserver, but backup check
+                        wf.save = 'urgent';
+                        wf.update = 'urgent';
+                        saveState(wf);
+                        applyState(wf);
                     }
                 });
             }
             
+            // ── STAP 2: Volgorde opslaan ─────────────────────────────────
             document.getElementById('save-order-btn').addEventListener('click', async () => {
+                const saveBtn = document.getElementById('save-order-btn');
+                const labelEl = saveBtn.querySelector('.wf-label');
                 const items = Array.from(list.children);
                 const newOrderIds = items.map(item => item.dataset.id);
-                
-                const saveBtn = document.getElementById('save-order-btn');
-                const labelEl = saveBtn ? saveBtn.querySelector('.step-label') : null;
-                const hintEl  = saveBtn ? saveBtn.querySelector('.step-hint')  : null;
 
-                if (saveBtn) {
-                    saveBtn.disabled = true;
-                    if (labelEl) labelEl.innerText = 'Synchroniseren...';
-                    if (hintEl)  hintEl.innerText  = 'Even geduld';
-                }
-                
-                await window.reorderArticles(newOrderIds);
-                
-                if (saveBtn) {
-                    saveBtn.classList.remove('unsaved');
-                    saveBtn.disabled = false;
-                    if (labelEl) labelEl.innerText = 'Volgorde Opslaan';
-                    if (hintEl)  hintEl.innerText  = 'Sleep & bewaar';
-                }
-                
-                alert('De nieuwe volgorde is succesvol opgeslagen!');
-            });
+                saveBtn.disabled = true;
+                if (labelEl) labelEl.innerText = 'Bezig…';
 
-            document.getElementById('test-mail-btn').addEventListener('click', async () => {
-                const btn = document.getElementById('test-mail-btn');
-                const originalText = btn.innerText;
-                
-                try {
-                    btn.innerText = "Bezig...";
-                    btn.disabled = true;
-                    
-                    const response = await fetch('email-wireframe.html');
-                    if(!response.ok) throw new Error("Netwerk error");
-                    const htmlText = await response.text();
-                    
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(htmlText, "text/html");
-                    const articles = await window.getArticles();
-                    
-                    const inject = (prefix, article) => {
-                        const articleUrl = `https://ceesoddens-bit.github.io/historische-nieuwsbrief/article-detail.html?id=${article.id}`;
-                        
-                        const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
-                        if(titleEl) {
-                            titleEl.innerHTML = `<a href="${articleUrl}" style="color: inherit; text-decoration: none;">${article.title}</a>`;
-                        }
-                        
-                        const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
-                        if(imgEl && article.image) {
-                            imgEl.src = article.image;
-                            const wrapper = doc.createElement('a');
-                            wrapper.href = articleUrl;
-                            wrapper.style.display = 'block';
-                            imgEl.parentNode.insertBefore(wrapper, imgEl);
-                            wrapper.appendChild(imgEl);
-                        }
-                        
-                        const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
-                        if(textEl) {
-                            textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel op website &rarr;</a>`;
-                        }
-                    };
-                    
-                    if(articles.length > 0) inject('hoofd', articles[0]);
-                    if(articles.length > 1) inject('sub1', articles[1]);
-                    if(articles.length > 2) inject('sub2', articles[2]);
-                    
-                    doc.querySelectorAll('[mc\\:edit]').forEach(el => el.removeAttribute('mc:edit'));
-                    
-                    let finalHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
-                    finalHTML = finalHTML.replace(/%2A%7C(.*?)%7C%2A/gi, '*|$1|*');
-                    
-                    let testWebhookUrl = "https://ceesodd.app.n8n.cloud/webhook/1c0a312d-641b-4c40-a52a-aa0dff478b07/";
+                const ok = await window.reorderArticles(newOrderIds);
 
-                    const postRes = await fetch(testWebhookUrl, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: "test_mail",
-                            html: finalHTML
-                        })
-                    });
+                saveBtn.disabled = false;
+                if (labelEl) labelEl.innerText = 'Volgorde Opslaan';
 
-                    if (!postRes.ok) {
-                        throw new Error(`Server reageerde met status: ${postRes.status} ${postRes.statusText}`);
-                    }
-
-                    alert("Test mail is verzonden!");
-                    
-                } catch(e) {
-                    alert('Fout bij verzenden test mail: ' + e.message);
-                } finally {
-                    btn.innerText = originalText;
-                    btn.disabled = false;
+                if (ok !== false) {
+                    wf.save = 'done';
+                    saveState(wf);
+                    applyState(wf);
+                    alert('Volgorde opgeslagen!');
+                } else {
+                    alert('Fout bij opslaan. Probeer opnieuw.');
                 }
             });
 
-            document.getElementById('update-doc-btn').addEventListener('click', async () => {
-                const btn = document.getElementById('update-doc-btn');
-                const originalText = btn.innerText;
-                
-                try {
-                    btn.innerText = "Bezig...";
-                    btn.disabled = true;
-                    
-                    const response = await fetch('email-wireframe.html');
-                    if(!response.ok) throw new Error("Netwerk error bij inladen wireframe");
-                    const htmlText = await response.text();
-                    
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(htmlText, "text/html");
-                    const articles = await window.getArticles();
-                    
-                    const inject = (prefix, article) => {
-                        const articleUrl = `https://ceesoddens-bit.github.io/historische-nieuwsbrief/article-detail.html?id=${article.id}`;
-                        
-                        const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
-                        if(titleEl) {
-                            titleEl.innerHTML = `<a href="${articleUrl}" style="color: inherit; text-decoration: none;">${article.title}</a>`;
-                        }
-                        
-                        const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
-                        if(imgEl && article.image) {
-                            imgEl.src = article.image;
-                            const wrapper = doc.createElement('a');
-                            wrapper.href = articleUrl;
-                            wrapper.style.display = 'block';
-                            imgEl.parentNode.insertBefore(wrapper, imgEl);
-                            wrapper.appendChild(imgEl);
-                        }
-                        
-                        const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
-                        if(textEl) {
-                            textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel op website &rarr;</a>`;
-                        }
-                    };
-                    
-                    if(articles.length > 0) inject('hoofd', articles[0]);
-                    if(articles.length > 1) inject('sub1', articles[1]);
-                    if(articles.length > 2) inject('sub2', articles[2]);
-                    
-                    doc.querySelectorAll('[mc\\:edit]').forEach(el => el.removeAttribute('mc:edit'));
-                    
-                    let finalHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
-                    finalHTML = finalHTML.replace(/%2A%7C(.*?)%7C%2A/gi, '*|$1|*');
-                    
-                    let webhookUrl = "https://ceesodd.app.n8n.cloud/webhook/e8710f1b-2044-4347-9c97-d37a25177107";
-
-                    const postRes = await fetch(webhookUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            html: finalHTML,
-                            docId: "1Kd4EAoKHoZQ1ymHRxez2KgTIg4RqXwGbNNYfcCCN92I"
-                        })
-                    });
-
-                    if (!postRes.ok) {
-                        throw new Error(`Webhook weigerde met status: ${postRes.status}`);
-                    }
-
-                    alert("Document succesvol geüpdatet!");
-                    
-                } catch (e) {
-                    alert("Fout bij updaten document: " + e.message);
-                } finally {
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                }
-            });
-
+            // ── STAP 3: Preview ──────────────────────────────────────────
             document.getElementById('preview-email-btn').addEventListener('click', async () => {
                 try {
                     const response = await fetch('email-wireframe.html');
@@ -343,54 +206,157 @@
                     
                     const inject = (prefix, article) => {
                         const articleUrl = `https://ceesoddens-bit.github.io/historische-nieuwsbrief/article-detail.html?id=${article.id}`;
-                        
                         const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
-                        if(titleEl) {
-                            titleEl.innerHTML = `<a href="${articleUrl}" style="color: inherit; text-decoration: none;">${article.title}</a>`;
-                        }
-                        
+                        if(titleEl) titleEl.innerHTML = `<a href="${articleUrl}" style="color: inherit; text-decoration: none;">${article.title}</a>`;
                         const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
                         if(imgEl && article.image) {
                             imgEl.src = article.image;
                             const wrapper = doc.createElement('a');
-                            wrapper.href = articleUrl;
-                            wrapper.style.display = 'block';
-                            imgEl.parentNode.insertBefore(wrapper, imgEl);
-                            wrapper.appendChild(imgEl);
+                            wrapper.href = articleUrl; wrapper.style.display = 'block';
+                            imgEl.parentNode.insertBefore(wrapper, imgEl); wrapper.appendChild(imgEl);
                         }
-                        
                         const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
-                        if(textEl) {
-                            textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel op website &rarr;</a>`;
-                        }
+                        if(textEl) textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel →</a>`;
                     };
                     
                     if(articles.length > 0) inject('hoofd', articles[0]);
-                    if(articles.length > 1) inject('sub1', articles[1]);
-                    if(articles.length > 2) inject('sub2', articles[2]);
+                    if(articles.length > 1) inject('sub1',  articles[1]);
+                    if(articles.length > 2) inject('sub2',  articles[2]);
 
-                    // Verberg lege rijen om het netjes te houden
-                    if(articles.length < 3) {
-                        const tr = doc.querySelector(`[mc\\:edit="sub2_img"]`);
-                        if(tr) tr.closest('table').closest('tr').style.display = 'none';
-                    }
-                    if(articles.length < 2) {
-                        const tr = doc.querySelector(`[mc\\:edit="sub1_img"]`);
-                        if(tr) tr.closest('table').closest('tr').style.display = 'none';
-                    }
-                    if(articles.length < 1) {
-                        const tr = doc.querySelector(`[mc\\:edit="hoofd_img"]`);
-                        if(tr) tr.closest('table').closest('tr').style.display = 'none';
-                    }
+                    if(articles.length < 3) { const tr = doc.querySelector(`[mc\\:edit="sub2_img"]`); if(tr) tr.closest('table').closest('tr').style.display = 'none'; }
+                    if(articles.length < 2) { const tr = doc.querySelector(`[mc\\:edit="sub1_img"]`); if(tr) tr.closest('table').closest('tr').style.display = 'none'; }
+                    if(articles.length < 1) { const tr = doc.querySelector(`[mc\\:edit="hoofd_img"]`); if(tr) tr.closest('table').closest('tr').style.display = 'none'; }
+
+                    let finalHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+                    finalHTML = finalHTML.replace(/%2A%7C(.*?)%7C%2A/gi, '*|$1|*');
+                    const blob = new Blob([finalHTML], { type: 'text/html' });
+                    window.open(URL.createObjectURL(blob), '_blank');
+
+                    // Stap 3 = groen
+                    wf.preview = 'done';
+                    saveState(wf); applyState(wf);
+                } catch(e) {
+                    alert('Preview laden mislukt.');
+                }
+            });
+
+            // ── STAP 4: Update HTML ──────────────────────────────────────
+            document.getElementById('update-doc-btn').addEventListener('click', async () => {
+                const btn = document.getElementById('update-doc-btn');
+                const labelEl = btn.querySelector('.wf-label');
+                try {
+                    btn.disabled = true;
+                    if (labelEl) labelEl.innerText = 'Bezig…';
+
+                    const response = await fetch('email-wireframe.html');
+                    if(!response.ok) throw new Error("Netwerk error bij inladen wireframe");
+                    const htmlText = await response.text();
                     
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, "text/html");
+                    const articles = await window.getArticles();
+                    
+                    const inject = (prefix, article) => {
+                        const articleUrl = `https://ceesoddens-bit.github.io/historische-nieuwsbrief/article-detail.html?id=${article.id}`;
+                        const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
+                        if(titleEl) titleEl.innerHTML = `<a href="${articleUrl}" style="color: inherit; text-decoration: none;">${article.title}</a>`;
+                        const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
+                        if(imgEl && article.image) {
+                            imgEl.src = article.image;
+                            const wrapper = doc.createElement('a');
+                            wrapper.href = articleUrl; wrapper.style.display = 'block';
+                            imgEl.parentNode.insertBefore(wrapper, imgEl); wrapper.appendChild(imgEl);
+                        }
+                        const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
+                        if(textEl) textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel →</a>`;
+                    };
+                    
+                    if(articles.length > 0) inject('hoofd', articles[0]);
+                    if(articles.length > 1) inject('sub1',  articles[1]);
+                    if(articles.length > 2) inject('sub2',  articles[2]);
+                    
+                    doc.querySelectorAll('[mc\\:edit]').forEach(el => el.removeAttribute('mc:edit'));
                     let finalHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
                     finalHTML = finalHTML.replace(/%2A%7C(.*?)%7C%2A/gi, '*|$1|*');
                     
-                    const blob = new Blob([finalHTML], { type: 'text/html' });
-                    const url = URL.createObjectURL(blob);
-                    window.open(url, '_blank');
+                    const postRes = await fetch("https://ceesodd.app.n8n.cloud/webhook/e8710f1b-2044-4347-9c97-d37a25177107", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ html: finalHTML, docId: "1Kd4EAoKHoZQ1ymHRxez2KgTIg4RqXwGbNNYfcCCN92I" })
+                    });
+                    if (!postRes.ok) throw new Error(`Webhook weigerde met status: ${postRes.status}`);
+
+                    // Stap 4 = done; stap 3 & 5 = urgent
+                    wf.update = 'done'; 
+                    wf.preview = 'urgent';
+                    wf.testmail = 'urgent';
+                    saveState(wf); 
+                    applyState(wf);
+                    alert("Document succesvol geüpdatet!");
+
+                } catch (e) {
+                    alert("Fout bij updaten document: " + e.message);
+                } finally {
+                    btn.disabled = false;
+                    if (labelEl) labelEl.innerText = 'Update HTML';
+                }
+            });
+
+            // ── STAP 5: Test mail ────────────────────────────────────────
+            document.getElementById('test-mail-btn').addEventListener('click', async () => {
+                const btn = document.getElementById('test-mail-btn');
+                const labelEl = btn.querySelector('.wf-label');
+                try {
+                    btn.disabled = true;
+                    if (labelEl) labelEl.innerText = 'Bezig…';
+
+                    const response = await fetch('email-wireframe.html');
+                    if(!response.ok) throw new Error("Netwerk error");
+                    const htmlText = await response.text();
+                    
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, "text/html");
+                    const articles = await window.getArticles();
+                    
+                    const inject = (prefix, article) => {
+                        const articleUrl = `https://ceesoddens-bit.github.io/historische-nieuwsbrief/article-detail.html?id=${article.id}`;
+                        const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
+                        if(titleEl) titleEl.innerHTML = `<a href="${articleUrl}" style="color: inherit; text-decoration: none;">${article.title}</a>`;
+                        const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
+                        if(imgEl && article.image) {
+                            imgEl.src = article.image;
+                            const wrapper = doc.createElement('a');
+                            wrapper.href = articleUrl; wrapper.style.display = 'block';
+                            imgEl.parentNode.insertBefore(wrapper, imgEl); wrapper.appendChild(imgEl);
+                        }
+                        const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
+                        if(textEl) textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel →</a>`;
+                    };
+                    
+                    if(articles.length > 0) inject('hoofd', articles[0]);
+                    if(articles.length > 1) inject('sub1',  articles[1]);
+                    if(articles.length > 2) inject('sub2',  articles[2]);
+                    
+                    doc.querySelectorAll('[mc\\:edit]').forEach(el => el.removeAttribute('mc:edit'));
+                    let finalHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+                    finalHTML = finalHTML.replace(/%2A%7C(.*?)%7C%2A/gi, '*|$1|*');
+
+                    const postRes = await fetch("https://ceesodd.app.n8n.cloud/webhook/1c0a312d-641b-4c40-a52a-aa0dff478b07/", {
+                        method: 'POST',
+                        body: JSON.stringify({ action: "test_mail", html: finalHTML })
+                    });
+                    if (!postRes.ok) throw new Error(`Server reageerde met status: ${postRes.status} ${postRes.statusText}`);
+
+                    // Stap 5 = groen
+                    wf.testmail = 'done';
+                    saveState(wf); applyState(wf);
+                    alert("Test mail is verzonden!");
+
                 } catch(e) {
-                    alert('Preview laden mislukt.');
+                    alert('Fout bij verzenden test mail: ' + e.message);
+                } finally {
+                    btn.disabled = false;
+                    if (labelEl) labelEl.innerText = 'Zend Test Mail';
                 }
             });
 
