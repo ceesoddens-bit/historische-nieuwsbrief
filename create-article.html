@@ -183,9 +183,9 @@
                         uploadBox.classList.add('has-image');
                         if (article.focalPoint1) {
                             focalPoint1 = article.focalPoint1;
-                            updateFocalMarker(marker1, focalPoint1);
-                            uploadBox.style.backgroundPosition = `${focalPoint1.x}% ${focalPoint1.y}%`;
                         }
+                        updateFocalMarker(marker1, focalPoint1);
+                        uploadBox.style.backgroundPosition = `${focalPoint1.x}% ${focalPoint1.y}%`;
                     }
                     if (article.image2) {
                         currentImageUrl2 = article.image2;
@@ -196,9 +196,9 @@
                         uploadBox2.classList.add('has-image');
                         if (article.focalPoint2) {
                             focalPoint2 = article.focalPoint2;
-                            updateFocalMarker(marker2, focalPoint2);
-                            uploadBox2.style.backgroundPosition = `${focalPoint2.x}% ${focalPoint2.y}%`;
                         }
+                        updateFocalMarker(marker2, focalPoint2);
+                        uploadBox2.style.backgroundPosition = `${focalPoint2.x}% ${focalPoint2.y}%`;
                     }
                     if (pageTitle) pageTitle.textContent = "Artikel Bewerken";
                     publishBtn.textContent = "Opslaan";
