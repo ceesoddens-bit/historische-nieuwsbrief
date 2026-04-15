@@ -59,7 +59,10 @@
                 const focal1 = article.focalPoint1 ? `${article.focalPoint1.x}% ${article.focalPoint1.y}%` : 'center';
                 const focal2 = article.focalPoint2 ? `${article.focalPoint2.x}% ${article.focalPoint2.y}%` : 'center';
 
-                const titleHtml = `<h1 class="detail-title">${article.title}</h1>`;
+                const titleHtml = `
+                    <h1 class="detail-title">${article.title}</h1>
+                    ${article.author ? `<div class="detail-author">Door ${article.author}</div>` : ''}
+                `;
                 const img1Html = article.image ? `
                     <div class="detail-hero-image" style="background-image: url('${article.image}'); background-size: cover; background-position: ${focal1}; border: none; margin-bottom: ${article.imageCaption ? '15px' : '2rem'};"></div>
                     ${article.imageCaption ? `<div class="detail-image-caption">${article.imageCaption}</div>` : ''}

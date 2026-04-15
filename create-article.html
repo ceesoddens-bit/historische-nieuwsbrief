@@ -49,6 +49,11 @@
                 <input type="text" id="article-title" placeholder="Voer hier je pakkende titel in...">
             </div>
 
+            <div class="form-group" id="author-group" style="order: 1.5;">
+                <label>Auteur</label>
+                <input type="text" id="article-author" placeholder="Naam van de schrijver...">
+            </div>
+
             <div class="form-group" id="image1-group" style="order: 2;">
                 <label id="image1-label">Foto</label>
                 <div class="image-upload-box" id="image-preview" style="background-size: cover; background-position: center; cursor: pointer;">
@@ -169,6 +174,7 @@
                 const article = articles.find(a => a.id === editId);
                 if (article) {
                     document.getElementById('article-title').value = article.title || '';
+                    document.getElementById('article-author').value = article.author || '';
                     document.getElementById('article-content').value = article.content || '';
                     document.getElementById('article-content-2').value = article.content2 || '';
                     document.getElementById('article-image-caption').value = article.imageCaption || '';
@@ -290,6 +296,7 @@
             publishBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 const title = document.getElementById('article-title').value;
+                const author = document.getElementById('article-author').value;
                 const content = document.getElementById('article-content').value;
                 const content2 = document.getElementById('article-content-2').value;
                 const imageCaption = document.getElementById('article-image-caption').value;
@@ -332,6 +339,7 @@
 
                 const articleData = {
                     title: title,
+                    author: author,
                     content: content,
                     content2: content2,
                     layout: layout,

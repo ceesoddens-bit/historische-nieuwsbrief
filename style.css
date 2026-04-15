@@ -490,8 +490,16 @@ body {
     font-weight: 900;
     line-height: 1.15;
     color: #111111;
-    margin-bottom: 40px;
+    margin-bottom: 15px; /* Reduced to make room for author */
     letter-spacing: -1px;
+}
+.detail-author {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 40px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 .detail-hero-image {
     width: 100%;

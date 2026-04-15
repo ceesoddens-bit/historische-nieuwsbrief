@@ -208,6 +208,8 @@
                         const articleUrl = `https://ceesoddens-bit.github.io/historische-nieuwsbrief/article-detail.html?id=${article.id}`;
                         const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
                         if(titleEl) titleEl.innerHTML = `<a href="${articleUrl}" style="color: inherit; text-decoration: none;">${article.title}</a>`;
+                        const authorEl = doc.querySelector(`[mc\\:edit="${prefix}_auteur"]`);
+                        if(authorEl) authorEl.innerHTML = article.author ? `Door ${article.author}` : '';
                         const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
                         if(imgEl && article.image) {
                             imgEl.src = article.image;
@@ -267,6 +269,8 @@
                         const articleUrl = `https://ceesoddens-bit.github.io/historische-nieuwsbrief/article-detail.html?id=${article.id}`;
                         const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
                         if(titleEl) titleEl.innerHTML = `<a href="${articleUrl}" style="color: inherit; text-decoration: none;">${article.title}</a>`;
+                        const authorEl = doc.querySelector(`[mc\\:edit="${prefix}_auteur"]`);
+                        if(authorEl) authorEl.innerHTML = article.author ? `Door ${article.author}` : '';
                         const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
                         if(imgEl && article.image) {
                             imgEl.src = article.image;
@@ -336,6 +340,8 @@
                         const articleUrl = `https://ceesoddens-bit.github.io/historische-nieuwsbrief/article-detail.html?id=${article.id}`;
                         const titleEl = doc.querySelector(`[mc\\:edit="${prefix}_titel"]`);
                         if(titleEl) titleEl.innerHTML = `<a href="${articleUrl}" style="color: inherit; text-decoration: none;">${article.title}</a>`;
+                        const authorEl = doc.querySelector(`[mc\\:edit="${prefix}_auteur"]`);
+                        if(authorEl) authorEl.innerHTML = article.author ? `Door ${article.author}` : '';
                         const imgEl = doc.querySelector(`[mc\\:edit="${prefix}_img"]`);
                         if(imgEl && article.image) {
                             imgEl.src = article.image;
