@@ -209,7 +209,10 @@ window.renderAdminList = async function() {
         div.dataset.id = article.id;
         div.innerHTML = `
             <div class="drag-handle" title="Sleep om te verplaatsen">☰</div>
-            <a href="article-detail.html?id=${article.id}" class="draggable-title">${article.title}</a>
+            <div style="flex-grow: 1; display: flex; flex-direction: column;">
+                <a href="article-detail.html?id=${article.id}" class="draggable-title" style="margin-bottom: 4px;">${article.title}</a>
+                ${article.author ? `<span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">Door ${article.author}</span>` : ''}
+            </div>
             <div style="display: flex; gap: 10px;">
                 <a href="create-article.html?id=${article.id}" class="article-button" style="padding: 8px 16px; font-size: 0.85rem;">Bewerken</a>
                 <button class="article-button delete-btn" data-id="${article.id}" style="padding: 8px 16px; font-size: 0.85rem; background: #dc2626; color: white; border: none; cursor: pointer;">Verwijderen</button>
