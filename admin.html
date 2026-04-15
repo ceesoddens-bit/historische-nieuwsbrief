@@ -145,18 +145,10 @@
                     let finalHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
                     finalHTML = finalHTML.replace(/%2A%7C(.*?)%7C%2A/gi, '*|$1|*');
                     
-                    let testWebhookUrl = localStorage.getItem('test_mail_webhook_url');
-                    if (!testWebhookUrl) {
-                        testWebhookUrl = prompt("Voer de Webhook URL in voor TEST MAILS:");
-                        if (!testWebhookUrl) throw new Error("Geannuleerd, geen URL opgegeven.");
-                        localStorage.setItem('test_mail_webhook_url', testWebhookUrl);
-                    }
+                    let testWebhookUrl = "https://ceesodd.app.n8n.cloud/webhook/1c0a312d-641b-4c40-a52a-aa0dff478b07/";
 
                     const postRes = await fetch(testWebhookUrl, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
                         body: JSON.stringify({
                             action: "test_mail",
                             html: finalHTML
@@ -164,10 +156,7 @@
                     });
 
                     if (!postRes.ok) {
-                        if (postRes.status === 404 || postRes.status === 401) {
-                            localStorage.removeItem('test_mail_webhook_url');
-                        }
-                        throw new Error(`Test webhook weigerde met status: ${postRes.status}`);
+                        throw new Error(`Server reageerde met status: ${postRes.status} ${postRes.statusText}`);
                     }
 
                     alert("Test mail is verzonden!");
