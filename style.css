@@ -46,7 +46,6 @@ body {
     align-items: center;
     z-index: 100;
 }
-
 .nav-brand {
     display: flex;
     align-items: center;
@@ -359,15 +358,14 @@ body {
     gap: 20px;
     transition: box-shadow 0.2s ease;
 }
-.draggable-item:hover {
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06);
-}
+
 .drag-handle {
     color: #a1a1aa;
     cursor: grab;
     font-size: 1.5rem;
     user-select: none;
 }
+
 .draggable-title {
     font-weight: 700;
     font-size: 1.2rem;
@@ -385,7 +383,7 @@ body {
 .draggable-list > .draggable-item:nth-child(3)::after,
 .draggable-list > .draggable-item:last-child:nth-child(1)::after,
 .draggable-list > .draggable-item:last-child:nth-child(2)::after {
-    content: '☝️ Bovenstaande artikelen komen in de Nieuwsbrief ☝️';
+    content: 'Bovenstaande artikelen komen in de Nieuwsbrief';
     position: absolute;
     bottom: -35px;
     left: 0;

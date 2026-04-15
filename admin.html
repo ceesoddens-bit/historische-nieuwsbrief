@@ -28,10 +28,11 @@
         <div class="admin-header">
             <h1>Artikeloverzicht</h1>
             <div style="display: flex; gap: 15px; align-items: center;">
-                <button id="export-n8n-btn" class="article-button" style="background: #2563eb; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Genereer n8n HTML</button>
-                <button id="update-doc-btn" class="article-button" style="background: #f97316; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Update HTML Doc</button>
                 <button id="preview-email-btn" class="article-button" style="background: #10b981; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Preview Nieuwsbrief</button>
+                <button id="update-doc-btn" class="article-button" style="background: #f97316; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Update html</button>
+                <button id="test-mail-btn" class="article-button" style="background: #8b5cf6; color: #fff; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px;">Zend test mail</button>
                 <button id="save-order-btn" class="article-button" style="background: transparent; color: #111; cursor: pointer; border: 2px solid #111;">Volgorde Opslaan</button>
+                <a href="index.html" class="article-button" style="background: #eee; color: #111; cursor: pointer; border: none; font-weight: bold; padding: 8px 16px; text-decoration: none;">&larr; Naar site</a>
                 <a href="create-article.html" class="btn-primary">+ Nieuw Artikel</a>
             </div>
         </div>
@@ -41,19 +42,6 @@
         </div>
 
     </main>
-
-    <!-- Export Modal -->
-    <div id="export-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
-        <div style="background: #fff; padding: 30px; border-radius: 12px; width: 90%; max-width: 800px; box-shadow: 0 25px 50px rgba(0,0,0,0.2);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 id="export-modal-title" style="margin: 0; font-size: 1.5rem;">Gegenereerde Mailchimp Code</h2>
-                <button id="close-modal-btn" style="background: none; border: none; font-size: 2rem; cursor: pointer;">&times;</button>
-            </div>
-            <p id="export-modal-desc" style="margin-bottom: 15px; color: #555;">Kopieer deze code rechtsreeks naar een "Custom HTML" of code blok in je Mailchimp template.</p>
-            <textarea id="export-textarea" style="width: 100%; height: 350px; font-family: monospace; padding: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.85rem;" readonly></textarea>
-            <button id="copy-clipboard-btn" class="btn-primary" style="margin-top: 15px; display: block; width: 100%; text-align: center; border: none; cursor: pointer;">Kopieer naar Klembord</button>
-        </div>
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script type="module" src="app.js"></script>
@@ -68,7 +56,6 @@
             const list = document.getElementById('admin-article-list');
             if(list) {
                 Sortable.create(list, {
-                    handle: '.drag-handle',
                     animation: 150,
                     ghostClass: 'sortable-ghost',
                     dragClass: 'sortable-drag',
@@ -106,32 +93,17 @@
                     saveBtn.disabled = false;
                 }
                 
-                alert('De nieuwe volgorde is succesvol opgeslagen en direct actief!');
+                alert('De nieuwe volgorde is succesvol opgeslagen!');
             });
-            
-            // Export logic
-            const modal = document.getElementById('export-modal');
-            const closeBtn = document.getElementById('close-modal-btn');
-            const copyBtn = document.getElementById('copy-clipboard-btn');
-            const textarea = document.getElementById('export-textarea');
-            
-            let defaultCopyText = "Kopieer naar Klembord";
-            
-            closeBtn.addEventListener('click', () => modal.style.display = 'none');
-            copyBtn.addEventListener('click', () => {
-                textarea.select();
-                document.execCommand('copy');
-                copyBtn.innerText = "Gekopieerd!";
-                setTimeout(() => copyBtn.innerText = defaultCopyText, 2000);
-            });
-            
-            document.getElementById('export-n8n-btn').addEventListener('click', async () => {
-                document.getElementById('export-modal-title').innerText = "Gegenereerde n8n HTML Code";
-                document.getElementById('export-modal-desc').innerText = "Kopieer deze code en gebruik het direct als Email node body in n8n. Alle elementen zijn als standalone HTML hardcoded ingevoerd en Mailchimp attributen zijn gestript.";
-                defaultCopyText = "Kopieer HTML voor n8n";
-                copyBtn.innerText = defaultCopyText;
+
+            document.getElementById('test-mail-btn').addEventListener('click', async () => {
+                const btn = document.getElementById('test-mail-btn');
+                const originalText = btn.innerText;
                 
                 try {
+                    btn.innerText = "Bezig...";
+                    btn.disabled = true;
+                    
                     const response = await fetch('email-wireframe.html');
                     if(!response.ok) throw new Error("Netwerk error");
                     const htmlText = await response.text();
@@ -173,10 +145,38 @@
                     let finalHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
                     finalHTML = finalHTML.replace(/%2A%7C(.*?)%7C%2A/gi, '*|$1|*');
                     
-                    textarea.value = finalHTML;
-                    modal.style.display = 'flex';
+                    let testWebhookUrl = localStorage.getItem('test_mail_webhook_url');
+                    if (!testWebhookUrl) {
+                        testWebhookUrl = prompt("Voer de Webhook URL in voor TEST MAILS:");
+                        if (!testWebhookUrl) throw new Error("Geannuleerd, geen URL opgegeven.");
+                        localStorage.setItem('test_mail_webhook_url', testWebhookUrl);
+                    }
+
+                    const postRes = await fetch(testWebhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            action: "test_mail",
+                            html: finalHTML
+                        })
+                    });
+
+                    if (!postRes.ok) {
+                        if (postRes.status === 404 || postRes.status === 401) {
+                            localStorage.removeItem('test_mail_webhook_url');
+                        }
+                        throw new Error(`Test webhook weigerde met status: ${postRes.status}`);
+                    }
+
+                    alert("Test mail is verzonden!");
+                    
                 } catch(e) {
-                    alert('Kon template niet inladen. Als je dit opent zonder lokale server (file:// protocol) dan blokkeert de browser deze fetch actie (CORS). Zorg dat je github pages test-link draait.');
+                    alert('Fout bij verzenden test mail: ' + e.message);
+                } finally {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
                 }
             });
 
@@ -308,14 +308,14 @@
                         if(tr) tr.closest('table').closest('tr').style.display = 'none';
                     }
                     
-                    let finalHTML = "<!DOCTYPE html>\\n" + doc.documentElement.outerHTML;
+                    let finalHTML = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
                     finalHTML = finalHTML.replace(/%2A%7C(.*?)%7C%2A/gi, '*|$1|*');
                     
                     const blob = new Blob([finalHTML], { type: 'text/html' });
                     const url = URL.createObjectURL(blob);
                     window.open(url, '_blank');
                 } catch(e) {
-                    alert('Preview laden mislukt. Draait de GitHub Pages versie?');
+                    alert('Preview laden mislukt.');
                 }
             });
 
