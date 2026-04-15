@@ -24,62 +24,42 @@
     <div class="workflow-toolbar">
         <div class="workflow-steps">
 
-            <!-- Stap 1: Nieuw artikel -->
-            <a href="create-article.html" class="workflow-step step-create" id="step1">
-                <span class="step-number">1</span>
-                <div class="step-body">
-                    <span class="step-label">Nieuw Artikel</span>
-                    <span class="step-hint">Schrijf &amp; bewerk</span>
-                </div>
-                <span class="step-icon">✏️</span>
+            <!-- Stap 1 -->
+            <a href="create-article.html" class="wf-btn" id="step1-btn">
+                <span class="wf-num">1</span>
+                <span class="wf-label">Nieuw Artikel</span>
             </a>
 
-            <div class="step-arrow">›</div>
+            <span class="wf-arrow">›</span>
 
-            <!-- Stap 2: Volgorde opslaan -->
-            <button class="workflow-step step-save" id="save-order-btn">
-                <span class="step-number">2</span>
-                <div class="step-body">
-                    <span class="step-label">Volgorde Opslaan</span>
-                    <span class="step-hint">Sleep &amp; bewaar</span>
-                </div>
-                <span class="step-icon">💾</span>
+            <!-- Stap 2 -->
+            <button class="wf-btn" id="save-order-btn">
+                <span class="wf-num">2</span>
+                <span class="wf-label">Volgorde Opslaan</span>
             </button>
 
-            <div class="step-arrow">›</div>
+            <span class="wf-arrow">›</span>
 
-            <!-- Stap 3: Preview nieuwsbrief -->
-            <button class="workflow-step step-preview" id="preview-email-btn">
-                <span class="step-number">3</span>
-                <div class="step-body">
-                    <span class="step-label">Preview</span>
-                    <span class="step-hint">Nieuwsbrief bekijken</span>
-                </div>
-                <span class="step-icon">👁️</span>
+            <!-- Stap 3 -->
+            <button class="wf-btn" id="preview-email-btn">
+                <span class="wf-num">3</span>
+                <span class="wf-label">Preview</span>
             </button>
 
-            <div class="step-arrow">›</div>
+            <span class="wf-arrow">›</span>
 
-            <!-- Stap 4: Update HTML -->
-            <button class="workflow-step step-update" id="update-doc-btn">
-                <span class="step-number">4</span>
-                <div class="step-body">
-                    <span class="step-label">Update HTML</span>
-                    <span class="step-hint">Naar Mailchimp doc</span>
-                </div>
-                <span class="step-icon">🔄</span>
+            <!-- Stap 4 -->
+            <button class="wf-btn" id="update-doc-btn">
+                <span class="wf-num">4</span>
+                <span class="wf-label">Update HTML</span>
             </button>
 
-            <div class="step-arrow">›</div>
+            <span class="wf-arrow">›</span>
 
-            <!-- Stap 5: Test mail -->
-            <button class="workflow-step step-testmail" id="test-mail-btn">
-                <span class="step-number">5</span>
-                <div class="step-body">
-                    <span class="step-label">Zend Test Mail</span>
-                    <span class="step-hint">Controleer e-mail</span>
-                </div>
-                <span class="step-icon">📧</span>
+            <!-- Stap 5 -->
+            <button class="wf-btn" id="test-mail-btn">
+                <span class="wf-num">5</span>
+                <span class="wf-label">Zend Test Mail</span>
             </button>
 
         </div>
@@ -89,7 +69,7 @@
             <span class="auto-send-icon">🕕</span>
             <div>
                 <span class="auto-send-title">Automatisch verzonden</span>
-                <span class="auto-send-sub">Elke vrijdag om 06:00 wordt de meest recent bijgewerkte versie verzonden</span>
+                <span class="auto-send-sub">Elke vrijdag om 06:00 — meest recente versie</span>
             </div>
         </div>
     </div>
@@ -116,6 +96,46 @@
                 return;
             }
             await window.renderAdminList();
+
+            // ── STATE MACHINE ────────────────────────────────────────────
+            // States per knop: 'idle' | 'urgent' | 'done'
+            // Bewaar in sessionStorage zodat het page-refresh overleeft.
+
+            const STATE_KEY = 'hn_wf_state';
+            const defaultState = {
+                save:    'idle',
+                preview: 'idle',
+                update:  'idle',
+                testmail:'idle'
+            };
+
+            function loadState() {
+                try { return JSON.parse(sessionStorage.getItem(STATE_KEY)) || defaultState; }
+                catch { return defaultState; }
+            }
+
+            function saveState(s) {
+                sessionStorage.setItem(STATE_KEY, JSON.stringify(s));
+            }
+
+            function applyState(s) {
+                setBtn('save-order-btn',    s.save);
+                setBtn('preview-email-btn', s.preview);
+                setBtn('update-doc-btn',    s.update);
+                setBtn('test-mail-btn',     s.testmail);
+            }
+
+            function setBtn(id, state) {
+                const btn = document.getElementById(id);
+                if (!btn) return;
+                btn.classList.remove('wf-idle', 'wf-urgent', 'wf-done');
+                btn.classList.add('wf-' + state);
+            }
+
+            // Initiële state
+            let wf = loadState();
+            applyState(wf);
+            // ─────────────────────────────────────────────────────────────
             
             const list = document.getElementById('admin-article-list');
             if(list) {
