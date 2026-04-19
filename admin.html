@@ -51,7 +51,7 @@
             <!-- Stap 4 -->
             <button class="wf-btn" id="update-doc-btn">
                 <span class="wf-num">4</span>
-                <span class="wf-label">Update HTML</span>
+                <span class="wf-label">Upload nieuwsbrief naar mail-server</span>
             </button>
 
             <span class="wf-arrow">›</span>
@@ -369,13 +369,13 @@
                     wf.testmail = 'urgent';
                     saveState(wf); 
                     applyState(wf);
-                    alert("Document succesvol geüpdatet!");
+                    alert("Nieuwsbrief succesvol geüpload naar mail-server!");
 
                 } catch (e) {
                     alert("Fout bij updaten document: " + e.message);
                 } finally {
                     btn.disabled = false;
-                    if (labelEl) labelEl.innerText = 'Update HTML';
+                    if (labelEl) labelEl.innerText = 'Upload nieuwsbrief naar mail-server';
                 }
             });
 
