@@ -363,9 +363,9 @@
                     });
                     if (!postRes.ok) throw new Error(`Webhook weigerde met status: ${postRes.status}`);
 
-                    // Stap 4 = done; stap 3 & 5 = urgent
+                    // Stap 4 = done; stap 3 = done; stap 5 = urgent
                     wf.update = 'done'; 
-                    wf.preview = 'urgent';
+                    wf.preview = 'done';
                     wf.testmail = 'urgent';
                     saveState(wf); 
                     applyState(wf);
