@@ -81,6 +81,24 @@
             <h1>Artikeloverzicht</h1>
         </div>
 
+        <!-- Nieuwsbrief Intro Editor -->
+        <div class="intro-editor-card" style="background: #ffffff; border-radius: 20px; padding: 30px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.03); margin-bottom: 30px;">
+            <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; color: #111111; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.2rem;">✉️</span> Nieuwsbrief Introductie
+            </h2>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label for="intro-greeting" style="font-weight: 700; font-size: 0.9rem; color: #64748b; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Begroeting</label>
+                    <input type="text" id="intro-greeting" placeholder="Bijv: Goedemorgen geschiedenisliefhebber," style="width: 100%; padding: 14px 18px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1rem; outline: none; font-family: inherit; background: #fdfbf7;">
+                </div>
+                <div class="form-group">
+                    <label for="intro-text" style="font-weight: 700; font-size: 0.9rem; color: #64748b; display: block; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Introductie tekst</label>
+                    <textarea id="intro-text" rows="3" placeholder="Welkom bij de nieuwste editie van onze nieuwsbrief..." style="width: 100%; padding: 14px 18px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 1rem; outline: none; font-family: inherit; resize: vertical; background: #fdfbf7; line-height: 1.6;"></textarea>
+                </div>
+            </div>
+            <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 15px; font-style: italic;">Deze tekst wordt automatisch opgeslagen en gebruikt in de preview en test-mail.</p>
+        </div>
+
         <div id="admin-article-list" class="draggable-list">
             <!-- Dynamisch gevuld door JS -->
         </div>
@@ -137,6 +155,39 @@
             applyState(wf);
             // ─────────────────────────────────────────────────────────────
             
+            // ── INTRO EDITOR LOGIC ────────────────────────────────────────
+            const greetingInput = document.getElementById('intro-greeting');
+            const introTextInput = document.getElementById('intro-text');
+
+            const STORAGE_INTRO_GREETING = 'hn_intro_greeting';
+            const STORAGE_INTRO_TEXT = 'hn_intro_text';
+
+            // Load saved intro or use defaults
+            greetingInput.value = localStorage.getItem(STORAGE_INTRO_GREETING) || "Goedemorgen geschiedenisliefhebber,";
+            introTextInput.value = localStorage.getItem(STORAGE_INTRO_TEXT) || "Welkom bij de nieuwste editie van onze nieuwsbrief. Hier blikken we terug op de verhalen die onze regio hebben gevormd en ontdekken we de verborgen verhalen uit het verleden.";
+
+            // Auto-save on input
+            const saveIntro = () => {
+                localStorage.setItem(STORAGE_INTRO_GREETING, greetingInput.value);
+                localStorage.setItem(STORAGE_INTRO_TEXT, introTextInput.value);
+                // Mark update as urgent
+                wf.update = 'urgent';
+                saveState(wf); applyState(wf);
+            };
+            greetingInput.addEventListener('input', saveIntro);
+            introTextInput.addEventListener('input', saveIntro);
+
+            const getIntroHTML = () => {
+                return `
+                    <p style="font-size: 17px; line-height: 1.6; color: #111111; font-weight: bold; margin: 0 0 10px 0;">
+                        ${greetingInput.value}
+                    </p>
+                    <p style="font-size: 15px; line-height: 1.8; color: #1a1a1a; margin: 0 0 40px 0;">
+                        ${introTextInput.value}
+                    </p>
+                `;
+            };
+
             const list = document.getElementById('admin-article-list');
 
             // Observe list changes (deletions/reorders) to trigger urgency
@@ -222,11 +273,15 @@
                             wrapper.href = articleUrl; wrapper.style.display = 'block';
                             imgEl.parentNode.insertBefore(wrapper, imgEl); wrapper.appendChild(imgEl);
                         }
-                        const captionEl = doc.querySelector(`[mc\\:edit="${prefix}_onderschrift"]`);
+                    const captionEl = doc.querySelector(`[mc\\:edit="${prefix}_onderschrift"]`);
                         if(captionEl) captionEl.innerHTML = article.imageCaption || '';
                         const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
                         if(textEl) textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel →</a>`;
                     };
+
+                    // Inject Intro
+                    const introEl = doc.querySelector('[mc\\:edit="intro_tekst"]');
+                    if(introEl) introEl.innerHTML = getIntroHTML();
                     
                     if(articles.length > 0) inject('hoofd', articles[0]);
                     if(articles.length > 1) inject('sub1',  articles[1]);
@@ -283,11 +338,15 @@
                             wrapper.href = articleUrl; wrapper.style.display = 'block';
                             imgEl.parentNode.insertBefore(wrapper, imgEl); wrapper.appendChild(imgEl);
                         }
-                        const captionEl = doc.querySelector(`[mc\\:edit="${prefix}_onderschrift"]`);
+                    const captionEl = doc.querySelector(`[mc\\:edit="${prefix}_onderschrift"]`);
                         if(captionEl) captionEl.innerHTML = article.imageCaption || '';
                         const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
                         if(textEl) textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel →</a>`;
                     };
+
+                    // Inject Intro
+                    const introEl = doc.querySelector('[mc\\:edit="intro_tekst"]');
+                    if(introEl) introEl.innerHTML = getIntroHTML();
                     
                     if(articles.length > 0) inject('hoofd', articles[0]);
                     if(articles.length > 1) inject('sub1',  articles[1]);
@@ -349,11 +408,15 @@
                             wrapper.href = articleUrl; wrapper.style.display = 'block';
                             imgEl.parentNode.insertBefore(wrapper, imgEl); wrapper.appendChild(imgEl);
                         }
-                        const captionEl = doc.querySelector(`[mc\\:edit="${prefix}_onderschrift"]`);
+                    const captionEl = doc.querySelector(`[mc\\:edit="${prefix}_onderschrift"]`);
                         if(captionEl) captionEl.innerHTML = article.imageCaption || '';
                         const textEl = doc.querySelector(`[mc\\:edit="${prefix}_tekst"]`);
                         if(textEl) textEl.innerHTML = `<a href="${articleUrl}" style="color: #f97316; font-size: 14px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 8px;">Lees artikel →</a>`;
                     };
+
+                    // Inject Intro
+                    const introEl = doc.querySelector('[mc\\:edit="intro_tekst"]');
+                    if(introEl) introEl.innerHTML = getIntroHTML();
                     
                     if(articles.length > 0) inject('hoofd', articles[0]);
                     if(articles.length > 1) inject('sub1',  articles[1]);
