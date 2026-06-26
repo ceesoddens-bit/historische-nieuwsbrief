@@ -134,7 +134,7 @@
             var giftBtn = document.createElement('button');
             giftBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';
             giftBtn.title = "Cadeaubon kopen";
-            giftBtn.style.cssText = "width:52px;height:52px;border-radius:50%;border:none;background:transparent;color:#fff;box-shadow:0 4px 15px rgba(0,0,0,0.15);cursor:pointer;transition:transform 0.2s,opacity 0.3s ease;display:flex;align-items:center;justify-content:center;font-family:sans-serif;opacity:0;";
+            giftBtn.style.cssText = "width:52px;height:52px;border-radius:50%;border:none;background:#1e293b;color:#fff;box-shadow:0 4px 15px rgba(0,0,0,0.15);cursor:pointer;transition:transform 0.2s,opacity 0.3s ease;display:flex;align-items:center;justify-content:center;font-family:sans-serif;opacity:1;";
             giftBtn.onmouseover = function () {
                 giftBtn.style.transform = 'scale(1.05)';
             };
@@ -144,7 +144,7 @@
 
             var btn = document.createElement('button');
             btn.innerText = "Reserveren";
-            btn.style.cssText = "padding:0 24px;height:52px;display:flex;align-items:center;justify-content:center;border:none;border-radius:50px;background:transparent;color:#ffffff;font-weight:600;font-size:14px;box-shadow:0 4px 15px rgba(0,0,0,0.2);cursor:pointer;transition:transform 0.2s,opacity 0.3s ease;font-family:sans-serif;opacity:0;";
+            btn.style.cssText = "padding:0 24px;height:52px;display:flex;align-items:center;justify-content:center;border:none;border-radius:50px;background:#1e293b;color:#ffffff;font-weight:600;font-size:14px;box-shadow:0 4px 15px rgba(0,0,0,0.2);cursor:pointer;transition:transform 0.2s,opacity 0.3s ease;font-family:sans-serif;opacity:1;";
             btn.onmouseover = function () {
                 btn.style.transform = 'scale(1.05)';
             };
@@ -383,7 +383,10 @@
                     iframe.style.transition = 'height 0.3s ease';
                 }, 50);
                 if (tab === 'reserveren') {
-                    iframe.style.height = '400px';
+                    iframe.style.height = '100%';
+                    if (!isExpanded) {
+                        wrap.style.height = '400px';
+                    }
                 }
             }
 
