@@ -73,13 +73,13 @@
     <!-- ARC Booking Widget Button -->
     <div id="arc-booking-widget-container"></div>
     <script>
-        (function() {
-            var WIDGET_URL = "http://localhost:3000/widget/IVTBpFtSaHL7jragotiu";
+        (function () {
+            var WIDGET_URL = "https://arc-booking.vercel.app/widget/IVTBpFtSaHL7jragotiu";
             var isOpen = false;
             var isExpanded = false;
             var DESKTOP = window.innerWidth >= 768;
 
-            window.addEventListener('resize', function() {
+            window.addEventListener('resize', function () {
                 DESKTOP = window.innerWidth >= 768;
             });
 
@@ -135,20 +135,20 @@
             giftBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';
             giftBtn.title = "Cadeaubon kopen";
             giftBtn.style.cssText = "width:52px;height:52px;border-radius:50%;border:none;background:transparent;color:#fff;box-shadow:0 4px 15px rgba(0,0,0,0.15);cursor:pointer;transition:transform 0.2s,opacity 0.3s ease;display:flex;align-items:center;justify-content:center;font-family:sans-serif;opacity:0;";
-            giftBtn.onmouseover = function() {
+            giftBtn.onmouseover = function () {
                 giftBtn.style.transform = 'scale(1.05)';
             };
-            giftBtn.onmouseout = function() {
+            giftBtn.onmouseout = function () {
                 giftBtn.style.transform = 'scale(1)';
             };
 
             var btn = document.createElement('button');
             btn.innerText = "Reserveren";
             btn.style.cssText = "padding:0 24px;height:52px;display:flex;align-items:center;justify-content:center;border:none;border-radius:50px;background:transparent;color:#ffffff;font-weight:600;font-size:14px;box-shadow:0 4px 15px rgba(0,0,0,0.2);cursor:pointer;transition:transform 0.2s,opacity 0.3s ease;font-family:sans-serif;opacity:0;";
-            btn.onmouseover = function() {
+            btn.onmouseover = function () {
                 btn.style.transform = 'scale(1.05)';
             };
-            btn.onmouseout = function() {
+            btn.onmouseout = function () {
                 btn.style.transform = 'scale(1)';
             };
 
@@ -195,7 +195,7 @@
                 eventsIframe.style.transition = '';
                 eventsIframe.src = EVENTS_URL;
                 eventsIframe.style.height = (getViewportHeight() - 40) + 'px';
-                setTimeout(function() {
+                setTimeout(function () {
                     eventsIframe.style.transition = 'height 0.3s ease';
                 }, 50);
                 eventsOverlay.style.display = 'flex';
@@ -210,7 +210,7 @@
             }
 
             eventsCloseBtn.onclick = closeEventsWidget;
-            eventsOverlay.onclick = function(e) {
+            eventsOverlay.onclick = function (e) {
                 if (e.target === eventsOverlay) closeEventsWidget();
             };
 
@@ -268,7 +268,7 @@
                 rafId = requestAnimationFrame(tick);
             }
 
-            window.addEventListener('message', function(e) {
+            window.addEventListener('message', function (e) {
                 if (!e.data) return;
                 if (e.data.type === 'arc-widget-resize') {
                     if (e.source !== iframe.contentWindow) return;
@@ -279,7 +279,7 @@
                         if (!isOpen) {
                             wrap.style.transition = 'none';
                             wrap.style.height = iframeHeight + 'px';
-                            requestAnimationFrame(function() {
+                            requestAnimationFrame(function () {
                                 wrap.style.transition = '';
                             });
                         } else {
@@ -294,8 +294,8 @@
                     var hc = e.data.headerColor;
                     if (pc) giftBtn.style.background = pc;
                     if (hc) btn.style.background = hc;
-                    requestAnimationFrame(function() {
-                        requestAnimationFrame(function() {
+                    requestAnimationFrame(function () {
+                        requestAnimationFrame(function () {
                             if (pc) giftBtn.style.opacity = '1';
                             if (hc) btn.style.opacity = '1';
                         });
@@ -305,7 +305,7 @@
                     if (e.source !== iframe.contentWindow) return;
                     isWidgetAnimating = true;
                     startHeightTracking(e.data.duration || 260);
-                    setTimeout(function() {
+                    setTimeout(function () {
                         isWidgetAnimating = false;
                     }, e.data.duration || 260);
                 }
@@ -347,7 +347,7 @@
                             type: 'arc-widget-open-event'
                         }, '*');
                     }
-                } catch (err) {}
+                } catch (err) { }
             }
 
             function close() {
@@ -379,7 +379,7 @@
                     iframe.contentWindow.postMessage(msg, '*');
                 }
                 iframe.style.transition = '';
-                setTimeout(function() {
+                setTimeout(function () {
                     iframe.style.transition = 'height 0.3s ease';
                 }, 50);
                 if (tab === 'reserveren') {
@@ -387,11 +387,11 @@
                 }
             }
 
-            btn.onclick = function() {
+            btn.onclick = function () {
                 setTab('reserveren');
                 isOpen ? close() : open();
             };
-            giftBtn.onclick = function() {
+            giftBtn.onclick = function () {
                 if (isOpen && currentTab === 'cadeaubon') {
                     close();
                 } else {
@@ -408,4 +408,5 @@
         })();
     </script>
 </body>
+
 </html>
